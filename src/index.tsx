@@ -16,7 +16,7 @@ function App() {
 
   const tabOptions: TabSelectObject[] = [
     { name: "Name", description: "Manage your notes" },
-    { name: "Tags", description: "Configure app settings" },
+    { name: "Tags", description: "Set tags related to your note" },
   ];
 
 
@@ -24,7 +24,6 @@ function App() {
     setSelectedTab(index);
   };
 
-  // Sync React state with TabSelect component
   useEffect(() => {
     if (tabSelectRef.current) {
       tabSelectRef.current.setSelectedIndex(selectedTab);
@@ -33,12 +32,10 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      // Tab moves to next tab (forward)
       const newIndex = (selectedTab + 1) % tabOptions.length;
       setSelectedTab(newIndex);
     },
     onShiftTab: () => {
-      // Shift+Tab moves to previous tab (backward)
       const newIndex = (selectedTab - 1 + tabOptions.length) % tabOptions.length;
       setSelectedTab(newIndex);
     },
@@ -54,7 +51,7 @@ function App() {
       <box justifyContent="center" alignItems="center" gap={2}>
         <ascii-font font="tiny" text="ColdNote" />
         <text attributes={TextAttributes.DIM}>
-          Create your notes in the terminal
+          Create your Obsidian notes in the terminal
         </text>
 
         <box>

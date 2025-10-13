@@ -25,7 +25,6 @@ export const useNavigation = (handlers: VimKeyHandler) => {
     } else if (key.name === 'j' || key.name === 'down') {
       handlers.onDown?.();
     } else if (key.name === 'tab' && key.shift) {
-      // Handle Shift+Tab
       handlers.onShiftTab?.();
     } else if (key.name === 'tab') {
       handlers.onTab?.();
@@ -36,12 +35,10 @@ export const useNavigation = (handlers: VimKeyHandler) => {
     } else if (key.name === 'escape') {
       handlers.onEscape?.();
     } else {
-      // Pass through any other keys
       handlers.onCustom?.(key.name || key);
     }
   }, [handlers]);
 
-  // Use the built-in OpenTUI keyboard hook
   useKeyboard(handleKeyPress);
 };
 
@@ -60,7 +57,7 @@ export const useVimNavigation = (maxIndex: number, initialIndex: number = 0) => 
     onDown: () => setCurrentIndex(prev => Math.min(maxIndex - 1, prev + 1)),
   };
 
-  useVimKeyboard(handlers);
+  useNavigation(handlers);
 
   return {
     currentIndex,
