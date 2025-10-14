@@ -1,28 +1,52 @@
-import {
-  TextAttributes,
-  TabSelectRenderable,
-  TerminalConsole,
-} from "@opentui/core";
+import { TabSelectRenderable } from "@opentui/core";
 import { render } from "@opentui/react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "./hooks/useNavigation";
 import type { TabSelectObject } from "./types";
 import { NoteNameInput } from "./components/note-name-input";
 import { DirSelect } from "./components/dir-select";
+import { TabSelect } from "./components/tab-select";
+import { Header } from "./components/header";
+import { Footer } from "./components/footer";
+import { TemplateSelect } from "./components/template-select";
+import { TagsSelect } from "./components/tags-select";
+import { AliasesInput } from "./components/aliases-input";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
   const tabSelectRef = useRef<TabSelectRenderable>(null);
   const [noteName, setNoteName] = useState<string | null>(null);
   const [dirPath, setDirPath] = useState<string | null>(null);
-
-  const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
-  const isTagsTabActive = () => tabOptions[selectedTab]?.name === "Tags";
+  const [templatePath, setTemplatePath] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [aliases, setAliases] = useState<string | null>(null);
 
   const tabOptions: TabSelectObject[] = [
     { name: "Name", description: "Manage your notes" },
-    { name: "Tags", description: "Set tags related to your note" },
+    {
+      name: "Directory",
+      description: "Select the directory to save your note",
+    },
+    {
+      name: "Template",
+      description: "Select note template",
+    },
+    {
+      name: "Tags",
+      description: "Select tags to be applied to the note",
+    },
+    {
+      name: "Aliases",
+      description: "Select aliases to be applied to the note",
+    },
   ];
+
+  const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
+  const isDirsTabActive = () => tabOptions[selectedTab]?.name === "Directory";
+  const isTemplateTabActive = () =>
+    tabOptions[selectedTab]?.name === "Template";
+  const isTagsTabActive = () => tabOptions[selectedTab]?.name === "Tags";
+  const isAliasesTabActive = () => tabOptions[selectedTab]?.name === "Aliases";
 
   const handleTabChange = (index: number) => {
     setSelectedTab(index);
@@ -54,27 +78,13 @@ function App() {
       backgroundColor="#1E1E2F"
     >
       <box justifyContent="center" alignItems="center" gap={2}>
-        <ascii-font font="tiny" text="ColdNote" />
-        <text attributes={TextAttributes.DIM}>
-          Create your Obsidian notes in the terminal
-        </text>
+        <Header />
 
-        <box>
-          <tab-select
-            ref={tabSelectRef}
-            options={tabOptions}
-            onSelect={handleTabChange}
-            focused={false}
-            width={60}
-            height={1}
-            showDescription={false}
-            showUnderline={false}
-            backgroundColor="#2A2A3A"
-            textColor="#FFFFFF"
-            selectedBackgroundColor="#5A5A6A"
-            selectedTextColor="#CBA6F7"
-          />
-        </box>
+        <TabSelect
+          tabSelectRef={tabSelectRef}
+          tabOptions={tabOptions}
+          handleTabChange={handleTabChange}
+        />
 
         {isNameTabActive() && (
           <NoteNameInput
@@ -84,15 +94,34 @@ function App() {
           />
         )}
 
-        {isTagsTabActive() && (
+        {isDirsTabActive() && (
           <DirSelect focused={true} dirPath={dirPath} setDirPath={setDirPath} />
         )}
 
-        <text>Selected tab: {tabOptions[selectedTab]?.name}</text>
-        <text attributes={TextAttributes.DIM}>
-          Tab Navigation: h/l (vim), Tab (next), Shift+Tab (prev) | Focus:{" "}
-          {tabOptions[selectedTab]?.name} content
-        </text>
+        {isTemplateTabActive() && (
+          <TemplateSelect
+            focused={true}
+            templatePath={templatePath}
+            setTemplatePath={setTemplatePath}
+          />
+        )}
+
+        {isTagsTabActive() && (
+          <TagsSelect
+            focused={true}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+          />
+        )}
+
+        {isAliasesTabActive() && (
+          <AliasesInput
+            focused={true}
+            aliases={aliases}
+            setAliases={setAliases}
+          />
+        )}
+        <Footer />
       </box>
     </box>
   );

@@ -1,45 +1,48 @@
-import {
-  type SelectOption,
-  type SelectRenderable,
-} from "@opentui/core";
+import { type SelectOption, type SelectRenderable } from "@opentui/core";
 import { useRef, useEffect } from "react";
 
-type DirSelectProps = {
+type TemplateSelectProps = {
   focused: boolean;
-  dirPath: string | null;
-  setDirPath: React.Dispatch<React.SetStateAction<string | null>>;
+  templatePath: string | null;
+  setTemplatePath: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export const DirSelect = ({ focused, dirPath, setDirPath }: DirSelectProps) => {
+export const TemplateSelect = ({
+  focused,
+  templatePath,
+  setTemplatePath,
+}: TemplateSelectProps) => {
   const options: SelectOption[] = [
     {
-      name: "dir1",
-      value: "~/coldLab/dir1",
+      name: "template1",
+      value: "~/coldLab/template1",
       description: "a cool dir",
     },
     {
-      name: "dir2",
-      value: "~/coldLab/dir2",
+      name: "template2",
+      value: "~/coldLab/template2",
       description: "a cool dir",
     },
     {
-      name: "dir3",
-      value: "~/coldLab/dir3",
+      name: "template3",
+      value: "~/coldLab/template3",
       description: "a cool dir",
     },
     {
-      name: "dir4",
-      value: "~/coldLab/dir4",
+      name: "template4",
+      value: "~/coldLab/template4",
       description: "a cool dir",
     },
     {
-      name: "dir5",
-      value: "~/coldLab/dir5",
+      name: "template5",
+      value: "~/coldLab/template5",
       description: "a cool dir",
     },
   ];
 
-  const selectedIndex = dirPath ? options.findIndex(opt => opt.value === dirPath) : -1;
+  const selectedIndex = templatePath
+    ? options.findIndex((opt) => opt.value === templatePath)
+    : -1;
   const selectRef = useRef<SelectRenderable | null>(null);
 
   useEffect(() => {
@@ -61,7 +64,8 @@ export const DirSelect = ({ focused, dirPath, setDirPath }: DirSelectProps) => {
         <select
           ref={selectRef}
           focused={focused}
-          onChange={(_, option) => setDirPath(option?.value)}
+          onChange={(_, option) => setTemplatePath(option?.value)}
+          onSelect={(_, option) => setTemplatePath(option?.value)}
           selectedTextColor="#CBA6F7"
           showScrollIndicator
           options={options}
