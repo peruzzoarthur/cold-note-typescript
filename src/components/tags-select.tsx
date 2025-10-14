@@ -1,11 +1,10 @@
-import {
-  type SelectOption,
-  type SelectRenderable,
-} from "@opentui/core";
-import { useRef } from "react";
+import { KeyEvent, type SelectOption, type SelectRenderable } from "@opentui/core";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
+import type { Tag } from "../database";
+import "./ui/create-button";
 
 type TagsSelectProps = {
   focused: boolean;
@@ -20,75 +19,70 @@ export const TagsSelect = ({
   setSelectedTab,
   tabOptions,
 }: TagsSelectProps) => {
-  const { noteData, setSelectedTags } = useNoteContext();
-  const { handleKeyDown: handleTabNavigation } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
-  const options: SelectOption[] = [
-    {
-      name: "Javascript",
-      value: "javascript",
-      description: "JavaScript programming language",
-    },
-    { name: "Linux", value: "linux", description: "Linux operating system" },
-    {
-      name: "Arch Linux",
-      value: "arch-linux",
-      description: "Arch Linux distribution",
-    },
-    {
-      name: "Typescript",
-      value: "typescript",
-      description: "TypeScript programming language",
-    },
-    { name: "React", value: "react", description: "React JavaScript library" },
-    {
-      name: "NestJs",
-      value: "nestjs",
-      description: "NestJS Node.js framework",
-    },
-    { name: "AWS", value: "aws", description: "Amazon Web Services" },
-    {
-      name: "Programming",
-      value: "programming",
-      description: "General programming concepts",
-    },
-    { name: "Github", value: "github", description: "GitHub version control" },
-    { name: "Docker", value: "docker", description: "Docker containerization" },
-    {
-      name: "Frontend",
-      value: "frontend",
-      description: "Frontend development",
-    },
-    { name: "nvim", value: "nvim", description: "Neovim text editor" },
-    { name: "Next", value: "next", description: "Next.js React framework" },
-    { name: "git", value: "git", description: "Git version control" },
-    {
-      name: "Graphql",
-      value: "graphql",
-      description: "GraphQL query language",
-    },
-    { name: "brave", value: "brave", description: "Brave web browser" },
-    { name: "nix", value: "nix", description: "Nix package manager" },
-    { name: "NixOS", value: "nixos", description: "NixOS operating system" },
-    {
-      name: "vercel",
-      value: "vercel",
-      description: "Vercel deployment platform",
-    },
-    {
-      name: "python",
-      value: "python",
-      description: "Python programming language",
-    },
-    { name: "DiDi", value: "didi", description: "DiDi ride-sharing service" },
-  ];
+  const { noteData, setSelectedTags, tagRepository } = useNoteContext();
+  const { handleKeyDown: handleTabNavigation } = useTabNavigation(
+    selectedTab,
+    setSelectedTab,
+    tabOptions,
+  );
 
-  const displayOptions: SelectOption[] = options.map((option) => {
-    const isSelected = noteData.selectedTags.includes(option.value);
-    const prefix = isSelected ? "● " : "○ ";
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [isInputMode, setIsInputMode] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [activeButton, setActiveButton] = useState(0); // 0 for add, 1 for search
+
+  useEffect(() => {
+    if (tagRepository) {
+      loadTags();
+    }
+  }, [tagRepository]);
+
+  const loadTags = useCallback(() => {
+    if (!tagRepository) return;
     
+    try {
+      const tags = tagRepository.findAll();
+      setAvailableTags(tags);
+      setFilteredTags(tags);
+    } catch (error) {
+      console.error("Failed to load tags:", error);
+    }
+  }, [tagRepository]);
+
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (!tagRepository) return;
+      
+      if (!query.trim()) {
+        setFilteredTags(availableTags);
+      } else {
+        try {
+          const searchResults = tagRepository.search(query);
+          setFilteredTags(searchResults);
+        } catch (error) {
+          console.error("Search failed:", error);
+          setFilteredTags([]);
+        }
+      }
+    },
+    [tagRepository, availableTags],
+  );
+
+  useEffect(() => {
+    handleSearch(searchInput);
+  }, [searchInput, handleSearch]);
+
+  const displayOptions: SelectOption[] = filteredTags.map((tag) => {
+    const isSelected = noteData.selectedTags.includes(tag.name);
+    const prefix = isSelected ? "● " : "○ ";
+
     return {
-      ...option,
-      name: `${prefix}${option.name}`,
+      name: `${prefix}${tag.name}`,
+      value: tag.name,
+      description: `Tag: ${tag.name}`,
     };
   });
 
@@ -97,49 +91,193 @@ export const TagsSelect = ({
   const handleTagToggle = (index: number, option: SelectOption | null) => {
     if (!option) return;
 
-    const actualOption = options[index];
-    if (!actualOption) return;
+    const actualTag = filteredTags[index];
+    if (!actualTag) return;
 
-    const tagValue = actualOption.value;
+    const tagName = actualTag.name;
     setSelectedTags(
-      noteData.selectedTags.includes(tagValue)
-        ? noteData.selectedTags.filter((tag) => tag !== tagValue)
-        : [...noteData.selectedTags, tagValue],
+      noteData.selectedTags.includes(tagName)
+        ? noteData.selectedTags.filter((tag) => tag !== tagName)
+        : [...noteData.selectedTags, tagName],
     );
   };
 
-  const handleTagsKeyDown = (key: any) => {
+  const handleAddTag = async () => {
+    if (!newTagInput.trim() || !tagRepository) return;
+
+    try {
+      if (!tagRepository.exists(newTagInput.trim())) {
+        tagRepository.create(newTagInput.trim());
+        loadTags();
+      }
+
+      // Add to selected tags if not already selected
+      if (!noteData.selectedTags.includes(newTagInput.trim())) {
+        setSelectedTags([...noteData.selectedTags, newTagInput.trim()]);
+      }
+
+      setNewTagInput("");
+      setIsInputMode(false);
+    } catch (error) {
+      console.error("Failed to add tag:", error);
+    }
+  };
+
+  const handleInputKeyDown = (key: any) => {
+    if (key.name === "return" || key.name === "enter") {
+      if (activeButton === 0) {
+        handleAddTag();
+      }
+    } else if (key.name === "escape") {
+      setIsInputMode(false);
+      setNewTagInput("");
+    } else if (key.name === "tab") {
+      handleTabNavigation(key);
+    }
+  };
+
+  const handleSearchKeyDown = (key: KeyEvent) => {
+    if (key.name === "escape") {
+      setIsSearchMode(false);
+      setSearchInput("");
+      setFilteredTags(availableTags);
+    } else if (key.name === "tab") {
+      handleTabNavigation(key);
+    }
+  };
+
+  const handleTagsKeyDown = (key: KeyEvent) => {
     if (key.name === "space") {
       const currentIndex = selectRef.current?.getSelectedIndex?.() || 0;
       const currentOption = displayOptions[currentIndex] ?? null;
       handleTagToggle(currentIndex, currentOption);
     } else if (key.name === "return" || key.name === "enter") {
       handleTabNavigation(key);
+    } else if (key.name === "n") {
+      setIsInputMode(true);
+    } else if (key.name === "s") {
+      setIsSearchMode(true);
+    } else if (key.name === "left") {
+      setActiveButton(0);
+    } else if (key.name === "right") {
+      setActiveButton(1);
     }
   };
 
+  const handleButtonNavigation = (key: KeyEvent) => {
+    if (key.name === "left") {
+      setActiveButton(0);
+    } else if (key.name === "right") {
+      setActiveButton(1);
+    } else if (key.name === "return" || key.name === "enter") {
+      if (activeButton === 0) {
+        setIsInputMode(true);
+      } else if (activeButton === 1) {
+        setIsSearchMode(true);
+      }
+    } else if (key.name === "tab") {
+      handleTabNavigation(key);
+    }
+  };
+
+  if (!tagRepository) {
+    return (
+      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+        <box style={{ flexDirection: "column", alignItems: "center" }}>
+          <text>Loading tags database...</text>
+        </box>
+      </box>
+    );
+  }
+
+  if (isSearchMode) {
+    return (
+      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+        <box style={{ flexDirection: "column", alignItems: "center" }}>
+          <box style={{ border: true, width: 40, height: 3 }}>
+            <input
+              placeholder="Search tags..."
+              value={searchInput}
+              focused={focused}
+              onKeyDown={handleSearchKeyDown}
+              onInput={setSearchInput}
+            />
+          </box>
+          <text>
+            Found {filteredTags.length} tag(s) | Escape to clear search
+          </text>
+        </box>
+      </box>
+    );
+  }
+
+  if (isInputMode) {
+    return (
+      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+        <box style={{ flexDirection: "column", alignItems: "center" }}>
+          <box style={{ border: true, width: 40, height: 3 }}>
+            <input
+              placeholder="Enter new tag name..."
+              value={newTagInput}
+              focused={focused}
+              onKeyDown={handleInputKeyDown}
+              onInput={setNewTagInput}
+            />
+          </box>
+          <box style={{ flexDirection: "row" }}>
+            <createButton
+              label="Add Tag"
+              focused={activeButton === 0}
+              width={20}
+            />
+            <createButton
+              label="Cancel"
+              focused={activeButton === 1}
+              width={20}
+            />
+          </box>
+          <text>Press Enter to add, Escape to cancel</text>
+        </box>
+      </box>
+    );
+  }
+
   return (
     <box style={{ paddingLeft: 1, paddingRight: 1 }}>
-      <box
-        style={{
-          height: 12,
-          width: 60,
-          marginBottom: 1,
-          border: true,
-        }}
-      >
-        <select
-          ref={selectRef}
-          focused={focused}
-          onSelect={handleTagToggle}
-          onKeyDown={handleTagsKeyDown}
-          showDescription={false}
-          backgroundColor="#CBA6F7"
-          selectedTextColor="#CBA6F7"
-          showScrollIndicator
-          options={displayOptions}
-          style={{ flexGrow: 1 }}
-        />
+      <box style={{ flexDirection: "column" }}>
+        <box
+          style={{
+            height: 10,
+            width: 60,
+            border: true,
+          }}
+        >
+          <select
+            ref={selectRef}
+            focused={focused && !isInputMode}
+            onSelect={handleTagToggle}
+            onKeyDown={handleTagsKeyDown}
+            showDescription={false}
+            backgroundColor="#CBA6F7"
+            selectedTextColor="#CBA6F7"
+            showScrollIndicator
+            options={displayOptions}
+            style={{ flexGrow: 1 }}
+          />
+        </box>
+        <box style={{ flexDirection: "row", justifyContent: "center" }}>
+          <createButton
+            label="New Tag (n)"
+            focused={focused && activeButton === 0}
+            width={20}
+          />
+          <createButton
+            label="Search (s)"
+            focused={focused && activeButton === 1}
+            width={20}
+          />
+        </box>
+        <text>Space: toggle | n: new | s: search | Enter: next</text>
       </box>
     </box>
   );

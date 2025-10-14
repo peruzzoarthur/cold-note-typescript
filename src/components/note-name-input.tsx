@@ -22,6 +22,7 @@ export const NoteNameInput = ({
   const handleNoteNameChange = useCallback((value: string) => {
     setNoteName(value);
   }, [setNoteName]);
+
   return (
     <box style={{ border: true, width: 40, height: 3, marginTop: 1 }}>
       <input

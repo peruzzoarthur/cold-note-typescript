@@ -12,6 +12,7 @@ import { TemplateSelect } from "./components/template-select";
 import { TagsSelect } from "./components/tags-select";
 import { AliasesInput } from "./components/aliases-input";
 import { NoteProvider } from "./contexts/NoteContext";
+import { CreateNote } from "./components/create-note";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -35,6 +36,10 @@ function App() {
       name: "Aliases",
       description: "Select aliases to be applied to the note",
     },
+    {
+      name: "Create",
+      description: "Create note",
+    },
   ];
 
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
@@ -43,6 +48,7 @@ function App() {
     tabOptions[selectedTab]?.name === "Template";
   const isTagsTabActive = () => tabOptions[selectedTab]?.name === "Tags";
   const isAliasesTabActive = () => tabOptions[selectedTab]?.name === "Aliases";
+  const isCreateTabActive = () => tabOptions[selectedTab]?.name === "Create";
 
   const handleTabChange = (index: number) => {
     setSelectedTab(index);
@@ -68,12 +74,10 @@ function App() {
 
   return (
     <box
-      alignItems="center"
-      justifyContent="center"
-      flexGrow={1}
+      style={{ alignItems: "center", justifyContent: "center", flexGrow: 1 }}
       backgroundColor="#1E1E2F"
     >
-      <box justifyContent="center" alignItems="center" gap={2} flexGrow={1}>
+      <box style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
         <Header />
 
         <TabSelect
@@ -83,10 +87,7 @@ function App() {
         />
 
         <box
-          style={{ height: 15, width: 60 }}
-          flexDirection="row"
-          justifyContent="center"
-          alignItems="center"
+          style={{ height: 15, width: 60, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
         >
           {isNameTabActive() && (
             <NoteNameInput
@@ -127,7 +128,13 @@ function App() {
           {isAliasesTabActive() && (
             <AliasesInput
               focused={true}
+              tabOptions={tabOptions}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
             />
+          )}
+          {isCreateTabActive() && (
+            <CreateNote />
           )}
         </box>
         <Footer />

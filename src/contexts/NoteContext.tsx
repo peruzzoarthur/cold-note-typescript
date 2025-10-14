@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { runMigrations, TagRepository } from "../database";
 
 interface NoteData {
   noteName: string | null;
@@ -15,6 +16,7 @@ interface NoteContextType {
   setTemplatePath: (path: string | null) => void;
   setSelectedTags: (tags: string[]) => void;
   setAliases: (aliases: string | null) => void;
+  tagRepository: TagRepository | null;
 }
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
@@ -40,6 +42,17 @@ export const NoteProvider = ({ children }: NoteProviderProps) => {
     aliases: null,
   });
 
+  const [tagRepository, setTagRepository] = useState<TagRepository | null>(null);
+
+  useEffect(() => {
+    try {
+      runMigrations();
+      setTagRepository(new TagRepository());
+    } catch (error) {
+      console.error("Failed to initialize database:", error);
+    }
+  }, []);
+
   const setNoteName = (name: string | null) => {
     setNoteData(prev => ({ ...prev, noteName: name }));
   };
@@ -60,6 +73,7 @@ export const NoteProvider = ({ children }: NoteProviderProps) => {
     setNoteData(prev => ({ ...prev, aliases }));
   };
 
+
   return (
     <NoteContext.Provider
       value={{
@@ -69,6 +83,7 @@ export const NoteProvider = ({ children }: NoteProviderProps) => {
         setTemplatePath,
         setSelectedTags,
         setAliases,
+        tagRepository,
       }}
     >
       {children}
