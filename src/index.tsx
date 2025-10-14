@@ -1,16 +1,21 @@
-import {  TextAttributes, TabSelectRenderable } from "@opentui/core";
+import {
+  TextAttributes,
+  TabSelectRenderable,
+  TerminalConsole,
+} from "@opentui/core";
 import { render } from "@opentui/react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "./hooks/useNavigation";
 import type { TabSelectObject } from "./types";
 import { NoteNameInput } from "./components/note-name-input";
-import { SelectDir } from "./components/select-dir";
+import { DirSelect } from "./components/dir-select";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
   const tabSelectRef = useRef<TabSelectRenderable>(null);
   const [noteName, setNoteName] = useState<string | null>(null);
-  
+  const [dirPath, setDirPath] = useState<string | null>(null);
+
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
   const isTagsTabActive = () => tabOptions[selectedTab]?.name === "Tags";
 
@@ -18,7 +23,6 @@ function App() {
     { name: "Name", description: "Manage your notes" },
     { name: "Tags", description: "Set tags related to your note" },
   ];
-
 
   const handleTabChange = (index: number) => {
     setSelectedTab(index);
@@ -36,7 +40,8 @@ function App() {
       setSelectedTab(newIndex);
     },
     onShiftTab: () => {
-      const newIndex = (selectedTab - 1 + tabOptions.length) % tabOptions.length;
+      const newIndex =
+        (selectedTab - 1 + tabOptions.length) % tabOptions.length;
       setSelectedTab(newIndex);
     },
   });
@@ -71,20 +76,22 @@ function App() {
           />
         </box>
 
-        {isNameTabActive() && 
-          <NoteNameInput focused={true} noteName={noteName} setNoteName={setNoteName} />
-        }
+        {isNameTabActive() && (
+          <NoteNameInput
+            focused={true}
+            noteName={noteName}
+            setNoteName={setNoteName}
+          />
+        )}
 
-        {isTagsTabActive() && 
-          <box padding={1} backgroundColor="#444444">
-            <SelectDir />
-            <text>Tags content - focused and ready for interaction</text>
-          </box>
-        }
+        {isTagsTabActive() && (
+          <DirSelect focused={true} dirPath={dirPath} setDirPath={setDirPath} />
+        )}
 
         <text>Selected tab: {tabOptions[selectedTab]?.name}</text>
         <text attributes={TextAttributes.DIM}>
-          Tab Navigation: h/l (vim), Tab (next), Shift+Tab (prev) | Focus: {tabOptions[selectedTab]?.name} content
+          Tab Navigation: h/l (vim), Tab (next), Shift+Tab (prev) | Focus:{" "}
+          {tabOptions[selectedTab]?.name} content
         </text>
       </box>
     </box>

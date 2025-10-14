@@ -1,4 +1,4 @@
 export type TabSelectObject = {
-  name: "Name" | "Tags";
+  name: "Name" | "Directory" | "Tags";
   description: string;
 };
