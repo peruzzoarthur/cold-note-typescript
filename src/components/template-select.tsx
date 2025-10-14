@@ -5,11 +5,10 @@ import {
 import { useRef, useEffect } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
+import { useNoteContext } from "../contexts/NoteContext";
 
 type TemplateSelectProps = {
   focused: boolean;
-  templatePath: string | null;
-  setTemplatePath: React.Dispatch<React.SetStateAction<string | null>>;
   selectedTab: number;
   setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
   tabOptions: TabSelectObject[];
@@ -17,12 +16,11 @@ type TemplateSelectProps = {
 
 export const TemplateSelect = ({
   focused,
-  templatePath,
-  setTemplatePath,
   selectedTab,
   setSelectedTab,
   tabOptions,
 }: TemplateSelectProps) => {
+  const { noteData, setTemplatePath } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
@@ -52,8 +50,8 @@ export const TemplateSelect = ({
     },
   ];
 
-  const selectedIndex = templatePath
-    ? options.findIndex((opt) => opt.value === templatePath)
+  const selectedIndex = noteData.templatePath
+    ? options.findIndex((opt) => opt.value === noteData.templatePath)
     : -1;
   const selectRef = useRef<SelectRenderable | null>(null);
 

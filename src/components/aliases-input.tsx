@@ -1,22 +1,23 @@
 import { useCallback } from "react";
+import { useNoteContext } from "../contexts/NoteContext";
 
 type AliasesInputProps = {
   focused: boolean;
-  aliases: string | null;
-  setAliases: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export const AliasesInput = ({ focused, aliases, setAliases }: AliasesInputProps) => {
+export const AliasesInput = ({ focused }: AliasesInputProps) => {
+  const { noteData, setAliases } = useNoteContext();
+  
   const handleAliasesChange = useCallback((value: string) => {
     setAliases(value)
-  }, [])
+  }, [setAliases])
   return (
     <box
       style={{ border: true, width: 40, height: 3, marginTop: 1 }}
     >
       <input
         placeholder="Enter aliases..."
-        value={aliases ?? undefined}
+        value={noteData.aliases ?? undefined}
         focused={focused}
         onInput={handleAliasesChange}
       />

@@ -1,11 +1,10 @@
 import { useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
+import { useNoteContext } from "../contexts/NoteContext";
 
 type NoteNameInputProps = {
   focused: boolean;
-  noteName: string | null;
-  setNoteName: React.Dispatch<React.SetStateAction<string | null>>;
   selectedTab: number;
   setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
   tabOptions: TabSelectObject[];
@@ -13,22 +12,21 @@ type NoteNameInputProps = {
 
 export const NoteNameInput = ({
   focused,
-  noteName,
-  setNoteName,
   selectedTab,
   setSelectedTab,
   tabOptions,
 }: NoteNameInputProps) => {
+  const { noteData, setNoteName } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   
   const handleNoteNameChange = useCallback((value: string) => {
     setNoteName(value);
-  }, []);
+  }, [setNoteName]);
   return (
     <box style={{ border: true, width: 40, height: 3, marginTop: 1 }}>
       <input
         placeholder="Enter note name..."
-        value={noteName ?? undefined}
+        value={noteData.noteName ?? undefined}
         focused={focused}
         onKeyDown={handleKeyDown}
         onInput={handleNoteNameChange}

@@ -5,11 +5,10 @@ import {
 import { useRef } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
+import { useNoteContext } from "../contexts/NoteContext";
 
 type TagsSelectProps = {
   focused: boolean;
-  selectedTags: string[];
-  setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
   selectedTab: number;
   setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
   tabOptions: TabSelectObject[];
@@ -17,12 +16,11 @@ type TagsSelectProps = {
 
 export const TagsSelect = ({
   focused,
-  selectedTags,
-  setSelectedTags,
   selectedTab,
   setSelectedTab,
   tabOptions,
 }: TagsSelectProps) => {
+  const { noteData, setSelectedTags } = useNoteContext();
   const { handleKeyDown: handleTabNavigation } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
@@ -85,7 +83,7 @@ export const TagsSelect = ({
   ];
 
   const displayOptions: SelectOption[] = options.map((option) => {
-    const isSelected = selectedTags.includes(option.value);
+    const isSelected = noteData.selectedTags.includes(option.value);
     const prefix = isSelected ? "● " : "○ ";
     
     return {
@@ -103,10 +101,10 @@ export const TagsSelect = ({
     if (!actualOption) return;
 
     const tagValue = actualOption.value;
-    setSelectedTags((prev) =>
-      prev.includes(tagValue)
-        ? prev.filter((tag) => tag !== tagValue)
-        : [...prev, tagValue],
+    setSelectedTags(
+      noteData.selectedTags.includes(tagValue)
+        ? noteData.selectedTags.filter((tag) => tag !== tagValue)
+        : [...noteData.selectedTags, tagValue],
     );
   };
 

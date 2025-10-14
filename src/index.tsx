@@ -11,15 +11,11 @@ import { Footer } from "./components/footer";
 import { TemplateSelect } from "./components/template-select";
 import { TagsSelect } from "./components/tags-select";
 import { AliasesInput } from "./components/aliases-input";
+import { NoteProvider } from "./contexts/NoteContext";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
   const tabSelectRef = useRef<TabSelectRenderable>(null);
-  const [noteName, setNoteName] = useState<string | null>(null);
-  const [dirPath, setDirPath] = useState<string | null>(null);
-  const [templatePath, setTemplatePath] = useState<string | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [aliases, setAliases] = useState<string | null>(null);
 
   const tabOptions: TabSelectObject[] = [
     { name: "Name", description: "Manage your notes" },
@@ -77,7 +73,7 @@ function App() {
       flexGrow={1}
       backgroundColor="#1E1E2F"
     >
-      <box justifyContent="center" alignItems="center" gap={2}>
+      <box justifyContent="center" alignItems="center" gap={2} flexGrow={1}>
         <Header />
 
         <TabSelect
@@ -86,61 +82,62 @@ function App() {
           handleTabChange={handleTabChange}
         />
 
-        {isNameTabActive() && (
-          <NoteNameInput
-            focused={true}
-            noteName={noteName}
-            setNoteName={setNoteName}
-            tabOptions={tabOptions}
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-          />
-        )}
+        <box
+          style={{ height: 15, width: 60 }}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+        >
+          {isNameTabActive() && (
+            <NoteNameInput
+              focused={true}
+              tabOptions={tabOptions}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+          )}
 
-        {isDirsTabActive() && (
-          <DirSelect
-            focused={true}
-            dirPath={dirPath}
-            setDirPath={setDirPath}
-            tabOptions={tabOptions}
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-          />
-        )}
+          {isDirsTabActive() && (
+            <DirSelect
+              focused={true}
+              tabOptions={tabOptions}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+          )}
 
-        {isTemplateTabActive() && (
-          <TemplateSelect
-            focused={true}
-            templatePath={templatePath}
-            setTemplatePath={setTemplatePath}
-            tabOptions={tabOptions}
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-          />
-        )}
+          {isTemplateTabActive() && (
+            <TemplateSelect
+              focused={true}
+              tabOptions={tabOptions}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+          )}
 
-        {isTagsTabActive() && (
-          <TagsSelect
-            focused={true}
-            selectedTags={selectedTags}
-            setSelectedTags={setSelectedTags}
-            tabOptions={tabOptions}
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-          />
-        )}
+          {isTagsTabActive() && (
+            <TagsSelect
+              focused={true}
+              tabOptions={tabOptions}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+          )}
 
-        {isAliasesTabActive() && (
-          <AliasesInput
-            focused={true}
-            aliases={aliases}
-            setAliases={setAliases}
-          />
-        )}
+          {isAliasesTabActive() && (
+            <AliasesInput
+              focused={true}
+            />
+          )}
+        </box>
         <Footer />
       </box>
     </box>
   );
 }
 
-render(<App />);
+render(
+  <NoteProvider>
+    <App />
+  </NoteProvider>
+);

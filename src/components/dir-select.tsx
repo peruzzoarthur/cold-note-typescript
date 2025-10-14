@@ -5,11 +5,10 @@ import {
 import { useRef, useEffect } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
+import { useNoteContext } from "../contexts/NoteContext";
 
 type DirSelectProps = {
   focused: boolean;
-  dirPath: string | null;
-  setDirPath: React.Dispatch<React.SetStateAction<string | null>>;
   selectedTab: number;
   setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
   tabOptions: TabSelectObject[];
@@ -17,12 +16,11 @@ type DirSelectProps = {
 
 export const DirSelect = ({
   focused,
-  dirPath,
-  setDirPath,
   selectedTab,
   setSelectedTab,
   tabOptions,
 }: DirSelectProps) => {
+  const { noteData, setDirPath } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
@@ -52,7 +50,7 @@ export const DirSelect = ({
     },
   ];
 
-  const selectedIndex = dirPath ? options.findIndex(opt => opt.value === dirPath) : -1;
+  const selectedIndex = noteData.dirPath ? options.findIndex(opt => opt.value === noteData.dirPath) : -1;
   const selectRef = useRef<SelectRenderable | null>(null);
 
   useEffect(() => {
