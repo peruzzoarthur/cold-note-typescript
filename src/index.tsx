@@ -91,11 +91,21 @@ function App() {
             focused={true}
             noteName={noteName}
             setNoteName={setNoteName}
+            tabOptions={tabOptions}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
           />
         )}
 
         {isDirsTabActive() && (
-          <DirSelect focused={true} dirPath={dirPath} setDirPath={setDirPath} />
+          <DirSelect
+            focused={true}
+            dirPath={dirPath}
+            setDirPath={setDirPath}
+            tabOptions={tabOptions}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+          />
         )}
 
         {isTemplateTabActive() && (
@@ -103,6 +113,9 @@ function App() {
             focused={true}
             templatePath={templatePath}
             setTemplatePath={setTemplatePath}
+            tabOptions={tabOptions}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
           />
         )}
 
@@ -111,6 +124,9 @@ function App() {
             focused={true}
             selectedTags={selectedTags}
             setSelectedTags={setSelectedTags}
+            tabOptions={tabOptions}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
           />
         )}
 

@@ -1,17 +1,29 @@
-import { type SelectOption, type SelectRenderable } from "@opentui/core";
+import {
+  type SelectOption,
+  type SelectRenderable,
+} from "@opentui/core";
 import { useRef, useEffect } from "react";
+import type { TabSelectObject } from "../types";
+import { useTabNavigation } from "../hooks/useTabNavigation";
 
 type TemplateSelectProps = {
   focused: boolean;
   templatePath: string | null;
   setTemplatePath: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedTab: number;
+  setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
+  tabOptions: TabSelectObject[];
 };
 
 export const TemplateSelect = ({
   focused,
   templatePath,
   setTemplatePath,
+  selectedTab,
+  setSelectedTab,
+  tabOptions,
 }: TemplateSelectProps) => {
+  const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
       name: "template1",
@@ -66,6 +78,7 @@ export const TemplateSelect = ({
           focused={focused}
           onChange={(_, option) => setTemplatePath(option?.value)}
           onSelect={(_, option) => setTemplatePath(option?.value)}
+          onKeyDown={handleKeyDown}
           selectedTextColor="#CBA6F7"
           showScrollIndicator
           options={options}

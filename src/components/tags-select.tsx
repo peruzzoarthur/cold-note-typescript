@@ -1,17 +1,29 @@
-import { type SelectOption, type SelectRenderable } from "@opentui/core";
+import {
+  type SelectOption,
+  type SelectRenderable,
+} from "@opentui/core";
 import { useRef } from "react";
+import type { TabSelectObject } from "../types";
+import { useTabNavigation } from "../hooks/useTabNavigation";
 
 type TagsSelectProps = {
   focused: boolean;
   selectedTags: string[];
   setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedTab: number;
+  setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
+  tabOptions: TabSelectObject[];
 };
 
 export const TagsSelect = ({
   focused,
   selectedTags,
   setSelectedTags,
+  selectedTab,
+  setSelectedTab,
+  tabOptions,
 }: TagsSelectProps) => {
+  const { handleKeyDown: handleTabNavigation } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
       name: "Javascript",
@@ -87,7 +99,6 @@ export const TagsSelect = ({
   const handleTagToggle = (index: number, option: SelectOption | null) => {
     if (!option) return;
 
-    // Extract the actual value from the original options array
     const actualOption = options[index];
     if (!actualOption) return;
 
@@ -97,6 +108,16 @@ export const TagsSelect = ({
         ? prev.filter((tag) => tag !== tagValue)
         : [...prev, tagValue],
     );
+  };
+
+  const handleTagsKeyDown = (key: any) => {
+    if (key.name === "space") {
+      const currentIndex = selectRef.current?.getSelectedIndex?.() || 0;
+      const currentOption = displayOptions[currentIndex] ?? null;
+      handleTagToggle(currentIndex, currentOption);
+    } else if (key.name === "return" || key.name === "enter") {
+      handleTabNavigation(key);
+    }
   };
 
   return (
@@ -113,6 +134,7 @@ export const TagsSelect = ({
           ref={selectRef}
           focused={focused}
           onSelect={handleTagToggle}
+          onKeyDown={handleTagsKeyDown}
           showDescription={false}
           backgroundColor="#CBA6F7"
           selectedTextColor="#CBA6F7"

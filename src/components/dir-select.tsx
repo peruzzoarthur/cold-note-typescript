@@ -3,14 +3,27 @@ import {
   type SelectRenderable,
 } from "@opentui/core";
 import { useRef, useEffect } from "react";
+import type { TabSelectObject } from "../types";
+import { useTabNavigation } from "../hooks/useTabNavigation";
 
 type DirSelectProps = {
   focused: boolean;
   dirPath: string | null;
   setDirPath: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedTab: number;
+  setSelectedTab: React.Dispatch<React.SetStateAction<number>>;
+  tabOptions: TabSelectObject[];
 };
 
-export const DirSelect = ({ focused, dirPath, setDirPath }: DirSelectProps) => {
+export const DirSelect = ({
+  focused,
+  dirPath,
+  setDirPath,
+  selectedTab,
+  setSelectedTab,
+  tabOptions,
+}: DirSelectProps) => {
+  const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const options: SelectOption[] = [
     {
       name: "dir1",
@@ -62,6 +75,7 @@ export const DirSelect = ({ focused, dirPath, setDirPath }: DirSelectProps) => {
           ref={selectRef}
           focused={focused}
           onChange={(_, option) => setDirPath(option?.value)}
+          onKeyDown={handleKeyDown}
           selectedTextColor="#CBA6F7"
           showScrollIndicator
           options={options}
