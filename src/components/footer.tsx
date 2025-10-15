@@ -2,10 +2,10 @@ import { TextAttributes } from "@opentui/core";
 
 export const Footer = () => {
   return (
-    <>
+    <box alignItems="center">
       <text attributes={TextAttributes.DIM}>
-        Tab Navigation: h/j/k/l (vim), Tab (next), Shift+Tab (prev) | Focus:{" "}
+        Vim Navigation: h/j/k/l, Tab (next), Shift+Tab (prev)
       </text>
-    </>
+    </box>
   );
 };

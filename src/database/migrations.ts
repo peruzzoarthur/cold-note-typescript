@@ -10,6 +10,13 @@ export function initializeDatabase() {
     )
   `;
 
+  const createConfigTable = `
+    CREATE TABLE IF NOT EXISTS config (
+      obsidian_vault TEXT UNIQUE NOT NULL,
+      templates_dir  TEXT UNIQUE NOT NULL
+    )
+  `
+
   const createUpdatedAtTrigger = `
     CREATE TRIGGER IF NOT EXISTS tags_updated_at
     AFTER UPDATE ON tags
@@ -18,10 +25,10 @@ export function initializeDatabase() {
     END
   `;
 
-  db.exec(createTagsTable);
-  db.exec(createUpdatedAtTrigger);
+  db.run(createTagsTable);
+  db.run(createConfigTable);
+  db.run(createUpdatedAtTrigger);
 
-  console.log('Tags database initialized successfully');
 }
 
 export function runMigrations() {

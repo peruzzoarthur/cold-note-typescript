@@ -2,13 +2,13 @@ import { db } from '../database';
 import type { Tag } from '../types';
 
 export class TagRepository {
-  private insertTag: any;
-  private selectTagById: any;
-  private selectTagByName: any;
-  private selectAllTags: any;
-  private updateTag: any;
-  private deleteTag: any;
-  private searchTags: any;
+  private insertTag!: ReturnType<typeof db.prepare>;
+  private selectTagById!: ReturnType<typeof db.prepare>;
+  private selectTagByName!: ReturnType<typeof db.prepare>;
+  private selectAllTags!: ReturnType<typeof db.prepare>;
+  private updateTag!: ReturnType<typeof db.prepare>;
+  private deleteTag!: ReturnType<typeof db.prepare>;
+  private searchTags!: ReturnType<typeof db.prepare>;
 
   constructor() {
     this.initStatements();

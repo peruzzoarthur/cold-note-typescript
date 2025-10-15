@@ -12,3 +12,27 @@ export const handleKeyDown = (
     setSelectedTab(newIndex);
   }
 };
+
+export const tabOptions: TabSelectObject[] = [
+  { name: "Name", description: "Manage your notes" },
+  {
+    name: "Directory",
+    description: "Select the directory to save your note",
+  },
+  {
+    name: "Template",
+    description: "Select note template",
+  },
+  {
+    name: "Tags",
+    description: "Select tags to be applied to the note",
+  },
+  {
+    name: "Aliases",
+    description: "Select aliases to be applied to the note",
+  },
+  {
+    name: "Create",
+    description: "Create note",
+  },
+];

@@ -1,11 +1,13 @@
 import {
   type SelectOption,
   type SelectRenderable,
+  type KeyEvent,
 } from "@opentui/core";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
+import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 
 type TemplateSelectProps = {
   focused: boolean;
@@ -22,6 +24,17 @@ export const TemplateSelect = ({
 }: TemplateSelectProps) => {
   const { noteData, setTemplatePath } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
+  const { handleGlobalKey } = useGlobalKeyboard();
+
+  const handleSelectKeyDown = useCallback((key: KeyEvent) => {
+    // Check global keys first
+    if (handleGlobalKey(key)) {
+      return;
+    }
+    
+    // Handle local navigation
+    handleKeyDown(key);
+  }, [handleGlobalKey, handleKeyDown]);
   const options: SelectOption[] = [
     {
       name: "template1",
@@ -76,7 +89,7 @@ export const TemplateSelect = ({
           focused={focused}
           onChange={(_, option) => setTemplatePath(option?.value)}
           onSelect={(_, option) => setTemplatePath(option?.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleSelectKeyDown}
           selectedTextColor="#CBA6F7"
           showScrollIndicator
           options={options}

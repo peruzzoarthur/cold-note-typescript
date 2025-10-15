@@ -1,8 +1,7 @@
-import { TabSelectRenderable } from "@opentui/core";
+import { KeyEvent, TabSelectRenderable } from "@opentui/core";
 import { render } from "@opentui/react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigation } from "./hooks/useNavigation";
-import type { TabSelectObject } from "./types";
 import { NoteNameInput } from "./components/note-name-input";
 import { DirSelect } from "./components/dir-select";
 import { TabSelect } from "./components/tab-select";
@@ -13,34 +12,31 @@ import { TagsSelect } from "./components/tags-select";
 import { AliasesInput } from "./components/aliases-input";
 import { NoteProvider } from "./contexts/NoteContext";
 import { CreateNote } from "./components/create-note";
+import { tabOptions } from "./utils";
+import { ConfigMenu } from "./components/config-menu";
+import { DebugPanel } from "./components/debug-panel";
+import {
+  GlobalKeyboardProvider,
+  useGlobalKeyboard,
+} from "./contexts/GlobalKeyboardContext";
+import { AppMenusProvider } from "./contexts/AppMenusContext";
+import { useAppMenus } from "./hooks/useAppMenus";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
   const tabSelectRef = useRef<TabSelectRenderable>(null);
 
-  const tabOptions: TabSelectObject[] = [
-    { name: "Name", description: "Manage your notes" },
-    {
-      name: "Directory",
-      description: "Select the directory to save your note",
-    },
-    {
-      name: "Template",
-      description: "Select note template",
-    },
-    {
-      name: "Tags",
-      description: "Select tags to be applied to the note",
-    },
-    {
-      name: "Aliases",
-      description: "Select aliases to be applied to the note",
-    },
-    {
-      name: "Create",
-      description: "Create note",
-    },
-  ];
+  const { registerGlobalHandler } = useGlobalKeyboard();
+  const {
+    isConfigMenuOpen,
+    toggleConfigMenu,
+    closeConfigMenu,
+    isDebugMenuOpen,
+    toggleDebugMenu,
+    closeDebugMenu,
+    addDebugLog,
+    debugLogs,
+  } = useAppMenus();
 
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
   const isDirsTabActive = () => tabOptions[selectedTab]?.name === "Directory";
@@ -62,22 +58,80 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      const newIndex = (selectedTab + 1) % tabOptions.length;
-      setSelectedTab(newIndex);
+      // Don't handle tab navigation if config menu is open
+      if (!isConfigMenuOpen) {
+        const newIndex = (selectedTab + 1) % tabOptions.length;
+        setSelectedTab(newIndex);
+      }
     },
     onShiftTab: () => {
-      const newIndex =
-        (selectedTab - 1 + tabOptions.length) % tabOptions.length;
-      setSelectedTab(newIndex);
+      // Don't handle shift+tab navigation if config menu is open
+      if (!isConfigMenuOpen) {
+        const newIndex =
+          (selectedTab - 1 + tabOptions.length) % tabOptions.length;
+        setSelectedTab(newIndex);
+      }
     },
   });
 
+  const handleGlobalKeys = useCallback(
+    (key: KeyEvent): boolean => {
+      // If config menu is open, don't handle tab navigation
+      if (isConfigMenuOpen && key.name === "tab") {
+        return false; // Let the config menu handle it
+      }
+      
+      if (key.ctrl && key.name === "d") {
+        toggleDebugMenu();
+        return true;
+      }
+      if (key.ctrl && (key.name === "," || key.name === "p")) {
+        toggleConfigMenu();
+        return true;
+      }
+      if (key.name === "escape") {
+        if (isConfigMenuOpen || isDebugMenuOpen) {
+          closeConfigMenu();
+          closeDebugMenu();
+          return true;
+        }
+        return false;
+      }
+      return false;
+    },
+    [
+      addDebugLog,
+      toggleDebugMenu,
+      toggleConfigMenu,
+      closeConfigMenu,
+      closeDebugMenu,
+      isConfigMenuOpen,
+      isDebugMenuOpen,
+    ],
+  );
+
+  useEffect(() => {
+    registerGlobalHandler(handleGlobalKeys);
+  }, [registerGlobalHandler, handleGlobalKeys]);
+
   return (
     <box
-      style={{ alignItems: "center", justifyContent: "center", flexGrow: 1 }}
       backgroundColor="#1E1E2F"
+      flexGrow={1}
+      border={true}
+      justifyContent="space-between"
     >
-      <box style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
+      <ConfigMenu
+        isMenuOpen={isConfigMenuOpen}
+        setIsMenuOpen={closeConfigMenu}
+      />
+      <DebugPanel isDebugOpen={isDebugMenuOpen} debugLogs={debugLogs} />
+      <box
+        backgroundColor="#1E1E2F"
+        justifyContent="center"
+        alignItems="center"
+        flexGrow={1}
+      >
         <Header />
 
         <TabSelect
@@ -87,11 +141,17 @@ function App() {
         />
 
         <box
-          style={{ height: 15, width: 60, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+          style={{
+            height: 15,
+            width: 60,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           {isNameTabActive() && (
             <NoteNameInput
-              focused={true}
+              focused={!isConfigMenuOpen && !isDebugMenuOpen}
               tabOptions={tabOptions}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
@@ -100,7 +160,7 @@ function App() {
 
           {isDirsTabActive() && (
             <DirSelect
-              focused={true}
+              focused={!isConfigMenuOpen && !isDebugMenuOpen}
               tabOptions={tabOptions}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
@@ -109,7 +169,7 @@ function App() {
 
           {isTemplateTabActive() && (
             <TemplateSelect
-              focused={true}
+              focused={!isConfigMenuOpen && !isDebugMenuOpen}
               tabOptions={tabOptions}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
@@ -118,7 +178,7 @@ function App() {
 
           {isTagsTabActive() && (
             <TagsSelect
-              focused={true}
+              focused={!isConfigMenuOpen && !isDebugMenuOpen}
               tabOptions={tabOptions}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
@@ -127,24 +187,26 @@ function App() {
 
           {isAliasesTabActive() && (
             <AliasesInput
-              focused={true}
+              focused={!isConfigMenuOpen && !isDebugMenuOpen}
               tabOptions={tabOptions}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
             />
           )}
-          {isCreateTabActive() && (
-            <CreateNote />
-          )}
+          {isCreateTabActive() && <CreateNote />}
         </box>
-        <Footer />
       </box>
+      <Footer />
     </box>
   );
 }
 
 render(
-  <NoteProvider>
-    <App />
-  </NoteProvider>
+  <GlobalKeyboardProvider>
+    <AppMenusProvider>
+      <NoteProvider>
+        <App />
+      </NoteProvider>
+    </AppMenusProvider>
+  </GlobalKeyboardProvider>,
 );

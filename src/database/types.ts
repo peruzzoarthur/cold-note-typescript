@@ -4,3 +4,8 @@ export interface Tag {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface Config {
+  obsidian_vault: string;
+  templates_dir: string;
+}

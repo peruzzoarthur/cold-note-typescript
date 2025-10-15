@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
+import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import type { Tag } from "../database";
 import "./ui/create-button";
 
@@ -25,6 +26,7 @@ export const TagsSelect = ({
     setSelectedTab,
     tabOptions,
   );
+  const { handleGlobalKey } = useGlobalKeyboard();
 
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
@@ -124,6 +126,11 @@ export const TagsSelect = ({
   };
 
   const handleInputKeyDown = (key: any) => {
+    // Check global keys first
+    if (handleGlobalKey(key)) {
+      return;
+    }
+    
     if (key.name === "return" || key.name === "enter") {
       if (activeButton === 0) {
         handleAddTag();
@@ -137,6 +144,11 @@ export const TagsSelect = ({
   };
 
   const handleSearchKeyDown = (key: KeyEvent) => {
+    // Check global keys first
+    if (handleGlobalKey(key)) {
+      return;
+    }
+    
     if (key.name === "escape") {
       setIsSearchMode(false);
       setSearchInput("");
@@ -147,6 +159,11 @@ export const TagsSelect = ({
   };
 
   const handleTagsKeyDown = (key: KeyEvent) => {
+    // Check global keys first
+    if (handleGlobalKey(key)) {
+      return;
+    }
+    
     if (key.name === "space") {
       const currentIndex = selectRef.current?.getSelectedIndex?.() || 0;
       const currentOption = displayOptions[currentIndex] ?? null;
@@ -165,6 +182,11 @@ export const TagsSelect = ({
   };
 
   const handleButtonNavigation = (key: KeyEvent) => {
+    // Check global keys first
+    if (handleGlobalKey(key)) {
+      return;
+    }
+    
     if (key.name === "left") {
       setActiveButton(0);
     } else if (key.name === "right") {
