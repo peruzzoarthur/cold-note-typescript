@@ -4,7 +4,7 @@ import { homedir } from 'os';
 import { mkdirSync, existsSync } from 'fs';
 
 const DB_DIR = join(homedir(), '.cold-note');
-const DB_PATH = join(DB_DIR, 'tags.db');
+const DB_PATH = join(DB_DIR, 'cold-note.db');
 
 if (!existsSync(DB_DIR)) {
   mkdirSync(DB_DIR, { recursive: true });

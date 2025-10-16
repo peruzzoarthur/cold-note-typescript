@@ -21,6 +21,7 @@ import {
 } from "./contexts/GlobalKeyboardContext";
 import { AppMenusProvider } from "./contexts/AppMenusContext";
 import { useAppMenus } from "./hooks/useAppMenus";
+import { runMigrations } from "./database";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -200,6 +201,8 @@ function App() {
     </box>
   );
 }
+
+runMigrations();
 
 render(
   <GlobalKeyboardProvider>
