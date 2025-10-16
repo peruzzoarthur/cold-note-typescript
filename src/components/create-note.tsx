@@ -3,7 +3,7 @@ import "./ui/create-button";
 import { useNoteContext } from "../contexts/NoteContext";
 import { useNavigation } from "../hooks/useNavigation";
 import { useState } from "react";
-import { writeFile } from "fs/promises";
+import { writeFile, readFile } from "fs/promises";
 import { spawn } from "child_process";
 import { useRenderer } from "@opentui/react";
 import { join } from "path";
@@ -20,7 +20,33 @@ export const CreateNote = () => {
       const dirPath = noteData.dirPath || process.cwd();
       const fullPath = join(dirPath, fileName);
       
-      await writeFile(fullPath, '');
+      // Read template content if a template is selected
+      let content = '';
+      if (noteData.templatePath) {
+        try {
+          content = await readFile(noteData.templatePath, 'utf-8');
+          
+          // Replace template variables
+          content = content
+            .replace(/{{title}}/g, noteData.noteName || 'Untitled')
+            .replace(/{{date}}/g, new Date().toISOString().split('T')[0])
+            .replace(/{{datetime}}/g, new Date().toISOString())
+            .replace(/{{tags}}/g, noteData.selectedTags.map(tag => `#${tag}`).join(' '))
+            .replace(/{{aliases}}/g, noteData.aliases.join(', '));
+            
+        } catch (templateError) {
+          console.error('Failed to read template:', templateError);
+          content = `# ${noteData.noteName || 'Untitled'}\n\n`;
+        }
+      } else {
+        // Default content if no template
+        content = `# ${noteData.noteName || 'Untitled'}\n\n`;
+        if (noteData.selectedTags.length > 0) {
+          content += `Tags: ${noteData.selectedTags.map(tag => `#${tag}`).join(' ')}\n\n`;
+        }
+      }
+      
+      await writeFile(fullPath, content);
       
       setTest(true);
       console.log(`Created file: ${fullPath}`);

@@ -3,11 +3,14 @@ import {
   type SelectRenderable,
   type KeyEvent,
 } from "@opentui/core";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { ConfigRepository } from "../database";
+import { readdirSync, statSync } from "fs";
+import { join, extname } from "path";
 
 type TemplateSelectProps = {
   focused: boolean;
@@ -25,6 +28,56 @@ export const TemplateSelect = ({
   const { noteData, setTemplatePath } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const { handleGlobalKey } = useGlobalKeyboard();
+  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [configRepo] = useState(() => new ConfigRepository());
+
+  useEffect(() => {
+    try {
+      const config = configRepo.find();
+      if (config?.templates_dir) {
+        const templatesPath = config.templates_dir.replace(/^~/, process.env.HOME || '');
+        
+        try {
+          const entries = readdirSync(templatesPath);
+          const templates = entries
+            .filter(entry => {
+              try {
+                const fullPath = join(templatesPath, entry);
+                const isFile = statSync(fullPath).isFile();
+                const isMarkdown = extname(entry) === '.md';
+                return isFile && isMarkdown && !entry.startsWith('.');
+              } catch {
+                return false;
+              }
+            })
+            .sort()
+            .map(template => ({
+              name: template.replace('.md', ''),
+              value: join(templatesPath, template),
+              description: `Template in ${config.templates_dir}`,
+            }));
+          
+          setOptions(templates);
+        } catch (error) {
+          console.error("Failed to read templates directory:", error);
+          setOptions([{
+            name: "Error",
+            value: "",
+            description: "Could not read templates directory. Check config.",
+          }]);
+        }
+      } else {
+        setOptions([{
+          name: "No templates configured",
+          value: "",
+          description: "Open config (Ctrl+P) to set templates directory path",
+        }]);
+      }
+    } catch (error) {
+      console.error("Failed to load config:", error);
+      setOptions([]);
+    }
+  }, [configRepo]);
 
   const handleSelectKeyDown = useCallback((key: KeyEvent) => {
     // Check global keys first
@@ -35,33 +88,6 @@ export const TemplateSelect = ({
     // Handle local navigation
     handleKeyDown(key);
   }, [handleGlobalKey, handleKeyDown]);
-  const options: SelectOption[] = [
-    {
-      name: "template1",
-      value: "~/coldLab/template1",
-      description: "a cool dir",
-    },
-    {
-      name: "template2",
-      value: "~/coldLab/template2",
-      description: "a cool dir",
-    },
-    {
-      name: "template3",
-      value: "~/coldLab/template3",
-      description: "a cool dir",
-    },
-    {
-      name: "template4",
-      value: "~/coldLab/template4",
-      description: "a cool dir",
-    },
-    {
-      name: "template5",
-      value: "~/coldLab/template5",
-      description: "a cool dir",
-    },
-  ];
 
   const selectedIndex = noteData.templatePath
     ? options.findIndex((opt) => opt.value === noteData.templatePath)

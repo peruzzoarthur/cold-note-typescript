@@ -3,11 +3,14 @@ import {
   type SelectRenderable,
   type KeyEvent,
 } from "@opentui/core";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { ConfigRepository } from "../database";
+import { readdirSync, statSync } from "fs";
+import { join } from "path";
 
 type DirSelectProps = {
   focused: boolean;
@@ -25,6 +28,54 @@ export const DirSelect = ({
   const { noteData, setDirPath } = useNoteContext();
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const { handleGlobalKey } = useGlobalKeyboard();
+  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [configRepo] = useState(() => new ConfigRepository());
+
+  useEffect(() => {
+    try {
+      const config = configRepo.find();
+      if (config?.obsidian_vault) {
+        const vaultPath = config.obsidian_vault.replace(/^~/, process.env.HOME || '');
+        
+        try {
+          const entries = readdirSync(vaultPath);
+          const dirs = entries
+            .filter(entry => {
+              try {
+                const fullPath = join(vaultPath, entry);
+                return statSync(fullPath).isDirectory() && !entry.startsWith('.');
+              } catch {
+                return false;
+              }
+            })
+            .sort()
+            .map(dir => ({
+              name: dir,
+              value: join(vaultPath, dir),
+              description: `Directory in ${config.obsidian_vault}`,
+            }));
+          
+          setOptions(dirs);
+        } catch (error) {
+          console.error("Failed to read vault directory:", error);
+          setOptions([{
+            name: "Error",
+            value: "",
+            description: "Could not read vault directory. Check config.",
+          }]);
+        }
+      } else {
+        setOptions([{
+          name: "No vault configured",
+          value: "",
+          description: "Open config (Ctrl+P) to set Obsidian vault path",
+        }]);
+      }
+    } catch (error) {
+      console.error("Failed to load config:", error);
+      setOptions([]);
+    }
+  }, [configRepo]);
 
   const handleSelectKeyDown = useCallback((key: KeyEvent) => {
     // Check global keys first
@@ -35,33 +86,6 @@ export const DirSelect = ({
     // Handle local navigation
     handleKeyDown(key);
   }, [handleGlobalKey, handleKeyDown]);
-  const options: SelectOption[] = [
-    {
-      name: "dir1",
-      value: "~/coldLab/dir1",
-      description: "a cool dir",
-    },
-    {
-      name: "dir2",
-      value: "~/coldLab/dir2",
-      description: "a cool dir",
-    },
-    {
-      name: "dir3",
-      value: "~/coldLab/dir3",
-      description: "a cool dir",
-    },
-    {
-      name: "dir4",
-      value: "~/coldLab/dir4",
-      description: "a cool dir",
-    },
-    {
-      name: "dir5",
-      value: "~/coldLab/dir5",
-      description: "a cool dir",
-    },
-  ];
 
   const selectedIndex = noteData.dirPath ? options.findIndex(opt => opt.value === noteData.dirPath) : -1;
   const selectRef = useRef<SelectRenderable | null>(null);
