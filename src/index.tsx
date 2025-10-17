@@ -1,5 +1,5 @@
 import { KeyEvent, TabSelectRenderable } from "@opentui/core";
-import { render } from "@opentui/react";
+import { render, useTerminalDimensions } from "@opentui/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigation } from "./hooks/useNavigation";
 import { NoteNameInput } from "./components/note-name-input";
@@ -11,7 +11,6 @@ import { TemplateSelect } from "./components/template-select";
 import { TagsSelect } from "./components/tags-select";
 import { AliasesInput } from "./components/aliases-input";
 import { NoteProvider } from "./contexts/NoteContext";
-import { CreateNote } from "./components/create-note";
 import { tabOptions } from "./utils";
 import { ConfigMenu } from "./components/config-menu";
 import { DebugPanel } from "./components/debug-panel";
@@ -22,6 +21,7 @@ import {
 import { AppMenusProvider } from "./contexts/AppMenusContext";
 import { useAppMenus } from "./hooks/useAppMenus";
 import { runMigrations } from "./database";
+import { CreateNote } from "./components/old-create-note";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -38,6 +38,8 @@ function App() {
     addDebugLog,
     debugLogs,
   } = useAppMenus();
+
+  const { width, height } = useTerminalDimensions()
 
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
   const isDirsTabActive = () => tabOptions[selectedTab]?.name === "Directory";
@@ -110,6 +112,10 @@ function App() {
       isDebugMenuOpen,
     ],
   );
+
+  useEffect(() => {
+    addDebugLog(`dimensions: w=${width} h=${height}`);
+  }, [width, height, addDebugLog]);
 
   useEffect(() => {
     registerGlobalHandler(handleGlobalKeys);

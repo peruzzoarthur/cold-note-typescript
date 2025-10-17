@@ -1,21 +1,21 @@
 import { TextAttributes } from "@opentui/core";
-import "./ui/create-button";
-import { useNoteContext } from "../contexts/NoteContext";
+import "../ui/create-button";
+import { useNoteContext } from "../../contexts/NoteContext";
 import { useKeyboard } from "@opentui/react";
 import { useState } from "react";
 import { writeFile, readFile } from "fs/promises";
 import { useRenderer } from "@opentui/react";
 import { join } from "path";
-import { useAppMenus } from "../hooks/useAppMenus";
-import { spawn } from "bun-pty";
+import { useAppMenus } from "../../hooks/useAppMenus";
+import { useOpenNote } from "./open-note";
 
 export const CreateNote = () => {
   const { noteData } = useNoteContext();
   const [test, setTest] = useState<boolean>(false);
   const [activeButton, setActiveButton] = useState<number>(0); // 0 for create, 1 for cancel
   const [nvimRunning, setNvimRunning] = useState<boolean>(false);
-  const renderer = useRenderer();
   const { addDebugLog } = useAppMenus();
+  const openNote = useOpenNote();
 
   const createAndOpenNote = async () => {
     const fileName = noteData.noteName
@@ -53,76 +53,8 @@ export const CreateNote = () => {
 
     await writeFile(fullPath, content);
 
-    // Destroy renderer BEFORE messing with stdin
-    renderer.destroy();
+    await openNote({ setNvimRunning, fullPath, dirPath })
 
-    // Small delay to ensure renderer cleanup is complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    setNvimRunning(true);
-
-    // Store ALL original stdin state
-    const originalListeners = process.stdin.listeners("data");
-    const originalRawMode = process.stdin.isRaw;
-
-    // Remove all data listeners
-    process.stdin.removeAllListeners("data");
-
-    // Ensure stdin is resumed and in raw mode
-    process.stdin.resume();
-    process.stdin.setRawMode(true);
-
-    // Clear screen and hide cursor
-    process.stdout.write("\x1b[?25l\x1b[2J\x1b[H");
-
-    // Create PTY for nvim
-    const nvimPty = spawn("nvim", [fullPath], {
-      name: "xterm-256color",
-      cols: process.stdout.columns || 80,
-      rows: process.stdout.rows || 24,
-      cwd: dirPath, // Use the note's directory as cwd
-    });
-
-    // Pipe PTY output to stdout
-    nvimPty.onData((data) => {
-      process.stdout.write(data);
-    });
-
-    // Pipe stdin to PTY - make sure this is working
-    const stdinHandler = (data: Buffer) => {
-      nvimPty.write(data.toString());
-    };
-
-    process.stdin.on("data", stdinHandler);
-
-    // Handle resize events
-    const resizeHandler = () => {
-      if (process.stdout.columns && process.stdout.rows) {
-        nvimPty.resize(process.stdout.columns, process.stdout.rows);
-      }
-    };
-    process.stdout.on("resize", resizeHandler);
-
-    // Handle nvim exit
-    nvimPty.onExit(() => {
-      // Clean up stdin handler
-      process.stdin.removeListener("data", stdinHandler);
-      process.stdout.removeListener("resize", resizeHandler);
-
-      // Restore stdin state
-      process.stdin.setRawMode(originalRawMode);
-
-      // Restore original listeners
-      originalListeners.forEach((listener: any) => {
-        process.stdin.on("data", listener);
-      });
-
-      // Clear screen and show cursor
-      process.stdout.write("\x1b[2J\x1b[H\x1b[?25h");
-
-      // Re-enable the UI
-      setNvimRunning(false);
-    });
   };
   // Custom keyboard handler that we can control
   useKeyboard((key) => {
