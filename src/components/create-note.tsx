@@ -1,112 +1,169 @@
 import { TextAttributes } from "@opentui/core";
 import "./ui/create-button";
 import { useNoteContext } from "../contexts/NoteContext";
-import { useNavigation } from "../hooks/useNavigation";
+import { useKeyboard } from "@opentui/react";
 import { useState } from "react";
 import { writeFile, readFile } from "fs/promises";
-import { spawn } from "child_process";
 import { useRenderer } from "@opentui/react";
 import { join } from "path";
+import { useAppMenus } from "../hooks/useAppMenus";
+import { spawn } from "bun-pty";
 
 export const CreateNote = () => {
   const { noteData } = useNoteContext();
   const [test, setTest] = useState<boolean>(false);
   const [activeButton, setActiveButton] = useState<number>(0); // 0 for create, 1 for cancel
+  const [nvimRunning, setNvimRunning] = useState<boolean>(false);
   const renderer = useRenderer();
+  const { addDebugLog } = useAppMenus();
 
-  const createAndOpenNote = async () => {
+const createAndOpenNote = async () => {
+  const fileName = noteData.noteName
+    ? `${noteData.noteName}.md`
+    : "untitled.md";
+  const dirPath = noteData.dirPath || process.cwd();
+  const fullPath = join(dirPath, fileName);
+
+  // Read template content if a template is selected
+  let content = "";
+  if (noteData.templatePath) {
     try {
-      const fileName = noteData.noteName ? `${noteData.noteName}.md` : 'untitled.md';
-      const dirPath = noteData.dirPath || process.cwd();
-      const fullPath = join(dirPath, fileName);
-      
-      // Read template content if a template is selected
-      let content = '';
-      if (noteData.templatePath) {
-        try {
-          content = await readFile(noteData.templatePath, 'utf-8');
-          
-          // Replace template variables
-          content = content
-            .replace(/{{title}}/g, noteData.noteName || 'Untitled')
-            .replace(/{{date}}/g, new Date().toISOString().split('T')[0])
-            .replace(/{{datetime}}/g, new Date().toISOString())
-            .replace(/{{tags}}/g, noteData.selectedTags.map(tag => `#${tag}`).join(' '))
-            .replace(/{{aliases}}/g, noteData.aliases.join(', '));
-            
-        } catch (templateError) {
-          console.error('Failed to read template:', templateError);
-          content = `# ${noteData.noteName || 'Untitled'}\n\n`;
-        }
-      } else {
-        // Default content if no template
-        content = `# ${noteData.noteName || 'Untitled'}\n\n`;
-        if (noteData.selectedTags.length > 0) {
-          content += `Tags: ${noteData.selectedTags.map(tag => `#${tag}`).join(' ')}\n\n`;
-        }
-      }
-      
-      await writeFile(fullPath, content);
-      
-      setTest(true);
-      console.log(`Created file: ${fullPath}`);
-      console.log('Opening in nvim...');
-      
-      // Clean up the TUI properly
-      setTimeout(() => {
-        renderer.destroy();
-        
-        // Open nvim
-        const nvimProcess = spawn('nvim', [fullPath], {
-          stdio: 'inherit'
-        });
-        
-        // Exit when nvim closes
-        nvimProcess.on('close', (code) => {
-          process.exit(code || 0);
-        });
-        
-        // Handle nvim launch errors
-        nvimProcess.on('error', (error) => {
-          console.error('Failed to launch nvim:', error);
-          console.log(`File created: ${fullPath}`);
-          process.exit(1);
-        });
-      }, 100); // Small delay to ensure console.log is visible
-      
-    } catch (error) {
-      console.error('Failed to create file:', error);
+      content = await readFile(noteData.templatePath, "utf-8");
+      addDebugLog(`content: ${content}`);
+
+      content = content
+        .replace(/{{title}}/g, noteData.noteName || "Untitled")
+        .replace(/{{date}}/g, new Date().toISOString())
+        .replace(/{{datetime}}/g, new Date().toISOString())
+        .replace(
+          /{{tags}}/g,
+          noteData.selectedTags.map((tag) => `#${tag}`).join(" "),
+        )
+        .replace(/{{aliases}}/g, noteData.aliases ?? "");
+    } catch (templateError) {
+      console.error("Failed to read template:", templateError);
+      content = `# ${noteData.noteName || "Untitled"}\n\n`;
+    }
+  } else {
+    content = `# ${noteData.noteName || "Untitled"}\n\n`;
+    if (noteData.selectedTags.length > 0) {
+      content += `Tags: ${noteData.selectedTags.map((tag) => `#${tag}`).join(" ")}\n\n`;
+    }
+  }
+
+  await writeFile(fullPath, content);
+
+  // Destroy renderer BEFORE messing with stdin
+  renderer.destroy();
+  
+  // Small delay to ensure renderer cleanup is complete
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  setNvimRunning(true);
+
+  // Store ALL original stdin state
+  const originalListeners = process.stdin.listeners('data');
+  const originalRawMode = process.stdin.isRaw;
+  
+  // Remove all data listeners
+  process.stdin.removeAllListeners('data');
+  
+  // Ensure stdin is resumed and in raw mode
+  process.stdin.resume();
+  process.stdin.setRawMode(true);
+  
+  // Clear screen and hide cursor
+  process.stdout.write('\x1b[?25l\x1b[2J\x1b[H');
+
+  // Create PTY for nvim
+  const nvimPty = spawn("nvim", [fullPath], {
+    name: "xterm-256color",
+    cols: process.stdout.columns || 80,
+    rows: process.stdout.rows || 24,
+    cwd: dirPath, // Use the note's directory as cwd
+  });
+
+  // Pipe PTY output to stdout
+  nvimPty.onData((data) => {
+    process.stdout.write(data);
+  });
+
+  // Pipe stdin to PTY - make sure this is working
+  const stdinHandler = (data: Buffer) => {
+    nvimPty.write(data.toString());
+  };
+  
+  process.stdin.on('data', stdinHandler);
+
+  // Handle resize events
+  const resizeHandler = () => {
+    if (process.stdout.columns && process.stdout.rows) {
+      nvimPty.resize(process.stdout.columns, process.stdout.rows);
     }
   };
+  process.stdout.on('resize', resizeHandler);
 
-  useNavigation({
-    onLeft: () => {
-      setActiveButton(0);
-    },
-    onRight: () => {
-      setActiveButton(1);
-    },
-    onEnter: () => {
-      if (activeButton === 0) {
-        createAndOpenNote();
-      } else {
-        console.log("Cancel button activated!");
-      }
-    },
-    onSpace: () => {
-      if (activeButton === 0) {
-        createAndOpenNote();
-      } else {
-        console.log("Cancel button activated!");
-      }
-    },
+  // Handle nvim exit
+  nvimPty.onExit(() => {
+    // Clean up stdin handler
+    process.stdin.removeListener('data', stdinHandler);
+    process.stdout.removeListener('resize', resizeHandler);
+    
+    // Restore stdin state
+    process.stdin.setRawMode(originalRawMode);
+    
+    // Restore original listeners
+    originalListeners.forEach((listener: any) => {
+      process.stdin.on('data', listener);
+    });
+    
+    // Clear screen and show cursor
+    process.stdout.write('\x1b[2J\x1b[H\x1b[?25h');
+    
+    // Re-enable the UI
+    setNvimRunning(false);
+
   });
+};
+  // Custom keyboard handler that we can control
+  useKeyboard((key) => {
+    if (nvimRunning) return; // Don't handle keys when nvim is running
+    
+    if (key.name === 'h' || key.name === 'left') {
+      setActiveButton(0);
+    } else if (key.name === 'l' || key.name === 'right') {
+      setActiveButton(1);
+    } else if (key.name === 'return' || key.name === 'enter' || key.name === 'space') {
+      if (activeButton === 0) {
+        createAndOpenNote();
+      } else {
+        console.log("Cancel button activated!");
+      }
+    }
+  });
+
+  // Don't render UI when nvim is running
+  if (nvimRunning) {
+    return null;
+  }
 
   return (
     <>
-      <box style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+      <box
+        style={{
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <box
-          style={{ border: true, width: 60, height: 10, marginTop: 1, flexGrow: 1 }}
+          style={{
+            border: true,
+            width: 60,
+            height: 10,
+            marginTop: 1,
+            flexGrow: 1,
+          }}
         >
           <text>
             <strong>Note Creation Context</strong>
@@ -128,7 +185,11 @@ export const CreateNote = () => {
           </text>
         </box>
         <box
-          style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <createButton
             label="Create note"
