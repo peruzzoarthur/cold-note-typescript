@@ -5,11 +5,13 @@ type TabSelectProps = {
   tabSelectRef: React.RefObject<TabSelectRenderable | null>;
   tabOptions: TabSelectObject[];
   handleTabChange: (index: number) => void;
+  isWideScreen: boolean
 };
 export const TabSelect = ({
   tabSelectRef,
   tabOptions,
   handleTabChange,
+  isWideScreen
 }: TabSelectProps) => {
   return (
     <box>
@@ -18,7 +20,7 @@ export const TabSelect = ({
         options={tabOptions}
         onSelect={handleTabChange}
         focused={false}
-        width={80}
+        width={isWideScreen ? 120 : 80}
         height={1}
         flexGrow={1}
         showDescription={false}

@@ -2,14 +2,9 @@ import { KeyEvent, TabSelectRenderable } from "@opentui/core";
 import { render, useTerminalDimensions } from "@opentui/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigation } from "./hooks/useNavigation";
-import { NoteNameInput } from "./components/note-name-input";
-import { DirSelect } from "./components/dir-select";
 import { TabSelect } from "./components/tab-select";
 import { Header } from "./components/header";
 import { Footer } from "./components/footer";
-import { TemplateSelect } from "./components/template-select";
-import { TagsSelect } from "./components/tags-select";
-import { AliasesInput } from "./components/aliases-input";
 import { NoteProvider } from "./contexts/NoteContext";
 import { tabOptions } from "./utils";
 import { ConfigMenu } from "./components/config-menu";
@@ -21,7 +16,8 @@ import {
 import { AppMenusProvider } from "./contexts/AppMenusContext";
 import { useAppMenus } from "./hooks/useAppMenus";
 import { runMigrations } from "./database";
-import { CreateNote } from "./components/old-create-note";
+import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
+import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -40,6 +36,8 @@ function App() {
   } = useAppMenus();
 
   const { width, height } = useTerminalDimensions()
+  
+  const isWideScreen = width >= 120;
 
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
   const isDirsTabActive = () => tabOptions[selectedTab]?.name === "Directory";
@@ -61,14 +59,12 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      // Don't handle tab navigation if config menu is open
       if (!isConfigMenuOpen) {
         const newIndex = (selectedTab + 1) % tabOptions.length;
         setSelectedTab(newIndex);
       }
     },
     onShiftTab: () => {
-      // Don't handle shift+tab navigation if config menu is open
       if (!isConfigMenuOpen) {
         const newIndex =
           (selectedTab - 1 + tabOptions.length) % tabOptions.length;
@@ -138,6 +134,9 @@ function App() {
         justifyContent="center"
         alignItems="center"
         flexGrow={1}
+        width="100%"
+        maxWidth={width - 2}
+        marginTop={isWideScreen ? 2 : 0}
       >
         <Header />
 
@@ -145,63 +144,38 @@ function App() {
           tabSelectRef={tabSelectRef}
           tabOptions={tabOptions}
           handleTabChange={handleTabChange}
+          isWideScreen={isWideScreen}
         />
 
-        <box
-          style={{
-            height: 15,
-            width: 60,
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {isNameTabActive() && (
-            <NoteNameInput
-              focused={!isConfigMenuOpen && !isDebugMenuOpen}
-              tabOptions={tabOptions}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
-
-          {isDirsTabActive() && (
-            <DirSelect
-              focused={!isConfigMenuOpen && !isDebugMenuOpen}
-              tabOptions={tabOptions}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
-
-          {isTemplateTabActive() && (
-            <TemplateSelect
-              focused={!isConfigMenuOpen && !isDebugMenuOpen}
-              tabOptions={tabOptions}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
-
-          {isTagsTabActive() && (
-            <TagsSelect
-              focused={!isConfigMenuOpen && !isDebugMenuOpen}
-              tabOptions={tabOptions}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
-
-          {isAliasesTabActive() && (
-            <AliasesInput
-              focused={!isConfigMenuOpen && !isDebugMenuOpen}
-              tabOptions={tabOptions}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
-          {isCreateTabActive() && <CreateNote />}
-        </box>
+        {isWideScreen ? (
+          <WideScreenLayout
+            isConfigMenuOpen={isConfigMenuOpen}
+            isDebugMenuOpen={isDebugMenuOpen}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            tabOptions={tabOptions}
+            isNameTabActive={isNameTabActive}
+            isDirsTabActive={isDirsTabActive}
+            isTemplateTabActive={isTemplateTabActive}
+            isTagsTabActive={isTagsTabActive}
+            isAliasesTabActive={isAliasesTabActive}
+            isCreateTabActive={isCreateTabActive}
+          />
+        ) : (
+          <NarrowScreenLayout
+            isConfigMenuOpen={isConfigMenuOpen}
+            isDebugMenuOpen={isDebugMenuOpen}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            tabOptions={tabOptions}
+            isNameTabActive={isNameTabActive}
+            isDirsTabActive={isDirsTabActive}
+            isTemplateTabActive={isTemplateTabActive}
+            isTagsTabActive={isTagsTabActive}
+            isAliasesTabActive={isAliasesTabActive}
+            isCreateTabActive={isCreateTabActive}
+          />
+        )}
       </box>
       <Footer />
     </box>

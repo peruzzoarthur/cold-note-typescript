@@ -280,7 +280,6 @@ export const TagsSelect = ({
             onSelect={handleTagToggle}
             onKeyDown={handleTagsKeyDown}
             showDescription={false}
-            backgroundColor="#CBA6F7"
             selectedTextColor="#CBA6F7"
             showScrollIndicator
             options={displayOptions}
@@ -288,16 +287,18 @@ export const TagsSelect = ({
           />
         </box>
         <box style={{ flexDirection: "row", justifyContent: "center" }}>
-          <createButton
-            label="New Tag (n)"
-            focused={focused && activeButton === 0}
-            width={20}
-          />
-          <createButton
-            label="Search (s)"
-            focused={focused && activeButton === 1}
-            width={20}
-          />
+          {/* <createButton */}
+          {/*   label="New Tag (n)" */}
+          {/*   focused={focused && !isInputMode && !isSearchMode && activeButton === 0} */}
+          {/*   width={20} */}
+          {/*   onKeyDown={handleButtonNavigation} */}
+          {/* /> */}
+          {/* <createButton */}
+          {/*   label="Search (s)" */}
+          {/*   focused={focused && !isInputMode && !isSearchMode && activeButton === 1} */}
+          {/*   width={20} */}
+          {/*   onKeyDown={handleButtonNavigation} */}
+          {/* /> */}
         </box>
         <text>Space: toggle | n: new | s: search | Enter: next</text>
       </box>

@@ -16,6 +16,10 @@ export const handleKeyDown = (
 export const tabOptions: TabSelectObject[] = [
   { name: "Name", description: "Manage your notes" },
   {
+    name: "Aliases",
+    description: "Select aliases to be applied to the note",
+  },
+  {
     name: "Directory",
     description: "Select the directory to save your note",
   },
@@ -26,10 +30,6 @@ export const tabOptions: TabSelectObject[] = [
   {
     name: "Tags",
     description: "Select tags to be applied to the note",
-  },
-  {
-    name: "Aliases",
-    description: "Select aliases to be applied to the note",
   },
   {
     name: "Create",
