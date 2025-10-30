@@ -90,11 +90,12 @@ export const WideScreenLayout = ({
       {/* Third row - Aliases */}
       <box
         style={{
+          flexDirection: "row",
           justifyContent: "center",
-          flexGrow: 1,
-          alignItems: "center",
+          alignItems: "flex-start",
+          gap: 4,
           width: "100%",
-          minHeight: 14,
+          minHeight: 12,
         }}
       >
         <TagsSelect
@@ -103,23 +104,21 @@ export const WideScreenLayout = ({
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
         />
-      </box>
-
-      {/* Fourth row - Create Note */}
-      <box
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          width: "90%",
-          minHeight: 12,
-        }}
-      >
-        {isCreateTabActive() ? (
-          <CreateNote isWideScreen={true} focused={true} />
-        ) : (
-          <CreateNote isWideScreen={true} focused={false} />
-        )}
+        <box
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "34%",
+            minHeight: 12,
+          }}
+        >
+          {isCreateTabActive() ? (
+            <CreateNote isWideScreen={true} focused={true} />
+          ) : (
+              <CreateNote isWideScreen={true} focused={false} />
+            )}
+        </box>
       </box>
     </box>
   );
