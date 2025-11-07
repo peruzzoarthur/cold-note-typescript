@@ -8,6 +8,8 @@ import { useVaultConfig } from "./hooks/useVaultConfig";
 import { useDirSelection } from "./hooks/useDirSelection";
 import { useSelectSync } from "./hooks/useSelectSync";
 import { useDirNavigationHandlers } from "./hooks/useDirNavigationHandlers";
+import { useCreateDir } from "./hooks/useCreateDir";
+import { useModal } from "../../contexts/ModalContext";
 
 type DirSelectProps = {
   focused: boolean;
@@ -43,12 +45,20 @@ export const DirSelect = ({
     selectedPath: noteData.dirPath,
   });
 
+  const { openModal } = useCreateDir({
+    currentPath: path,
+    setOptions,
+  });
+
+  const { isCreateDirModalOpen } = useModal();
+
   const { handleNavigationKeyDown } = useDirNavigationHandlers({
     currentOption,
     path,
     handleNavigateDir,
     handleGlobalKey,
     handleKeyDown,
+    onCreateDir: openModal,
   });
 
   return (
@@ -63,7 +73,7 @@ export const DirSelect = ({
       >
         <select
           ref={selectRef}
-          focused={focused}
+          focused={focused && !isCreateDirModalOpen}
           onChange={(_, option) => {
             setCurrentOption(option || null);
             setDirPath(option?.value);

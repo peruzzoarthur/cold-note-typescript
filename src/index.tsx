@@ -18,6 +18,8 @@ import { useAppMenus } from "./hooks/useAppMenus";
 import { runMigrations } from "./database";
 import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
 import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
+import { ModalProvider, useModal } from "./contexts/ModalContext";
+import { CreateDirModal } from "./components/dir-select/CreateDirModal";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -34,6 +36,12 @@ function App() {
     addDebugLog,
     debugLogs,
   } = useAppMenus();
+
+  const {
+    isCreateDirModalOpen,
+    closeCreateDirModal,
+    createDirCallback,
+  } = useModal();
 
   const { width, height } = useTerminalDimensions()
   
@@ -79,7 +87,7 @@ function App() {
       if (isConfigMenuOpen && key.name === "tab") {
         return false; // Let the config menu handle it
       }
-      
+
       if (key.ctrl && key.name === "d") {
         toggleDebugMenu();
         return true;
@@ -89,6 +97,10 @@ function App() {
         return true;
       }
       if (key.name === "escape") {
+        if (isCreateDirModalOpen) {
+          closeCreateDirModal();
+          return true;
+        }
         if (isConfigMenuOpen || isDebugMenuOpen) {
           closeConfigMenu();
           closeDebugMenu();
@@ -106,6 +118,8 @@ function App() {
       closeDebugMenu,
       isConfigMenuOpen,
       isDebugMenuOpen,
+      isCreateDirModalOpen,
+      closeCreateDirModal,
     ],
   );
 
@@ -129,6 +143,15 @@ function App() {
         setIsMenuOpen={closeConfigMenu}
       />
       <DebugPanel isDebugOpen={isDebugMenuOpen} debugLogs={debugLogs} />
+      {isCreateDirModalOpen && createDirCallback && (
+        <CreateDirModal
+          onSubmit={(dirName) => {
+            createDirCallback(dirName);
+            closeCreateDirModal();
+          }}
+          onCancel={closeCreateDirModal}
+        />
+      )}
       <box
         backgroundColor="#1E1E2F"
         justifyContent="center"
@@ -187,9 +210,11 @@ runMigrations();
 render(
   <GlobalKeyboardProvider>
     <AppMenusProvider>
-      <NoteProvider>
-        <App />
-      </NoteProvider>
+      <ModalProvider>
+        <NoteProvider>
+          <App />
+        </NoteProvider>
+      </ModalProvider>
     </AppMenusProvider>
   </GlobalKeyboardProvider>,
 );

@@ -7,6 +7,7 @@ type UseDirNavigationHandlersProps = {
   handleNavigateDir: (key: KeyEvent, name: string) => void;
   handleGlobalKey: (key: KeyEvent) => boolean;
   handleKeyDown: (key: KeyEvent) => void;
+  onCreateDir?: () => void;
 };
 
 export const useDirNavigationHandlers = ({
@@ -15,6 +16,7 @@ export const useDirNavigationHandlers = ({
   handleNavigateDir,
   handleGlobalKey,
   handleKeyDown,
+  onCreateDir,
 }: UseDirNavigationHandlersProps) => {
 
   const handleSelectKeyDown = useCallback(
@@ -36,9 +38,13 @@ export const useDirNavigationHandlers = ({
       if (key.name === "-" && path) {
         handleNavigateDir(key, path);
       }
+      if ((key.name === "n" || key.name === "+") && onCreateDir) {
+        onCreateDir();
+        return;
+      }
       handleSelectKeyDown(key);
     },
-    [currentOption, path, handleNavigateDir, handleSelectKeyDown],
+    [currentOption, path, handleNavigateDir, handleSelectKeyDown, onCreateDir],
   );
 
   return { handleNavigationKeyDown };
