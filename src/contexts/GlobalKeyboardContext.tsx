@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useCallback, useState } from 'react';
+import { createContext, useContext, type ReactNode, useCallback, useState } from 'react';
 import type { KeyEvent } from '@opentui/core';
 
 type GlobalKeyHandler = (key: KeyEvent) => boolean; // return true if handled
@@ -32,7 +32,6 @@ export const GlobalKeyboardProvider = ({ children }: { children: ReactNode }) =>
     return false;
   }, [globalHandler]);
 
-  // Add a global key listener at the root level
   const handleRootKeyDown = useCallback((key: KeyEvent) => {
     handleGlobalKey(key);
   }, [handleGlobalKey]);

@@ -34,12 +34,10 @@ export const AliasesInput = ({
   );
 
   const handleInputKeyDown = useCallback((key: KeyEvent) => {
-    // Check global keys first
     if (handleGlobalKey(key)) {
-      return; // Global key was handled, don't process further
+      return; 
     }
     
-    // Handle local navigation
     handleKeyDown(key);
   }, [handleGlobalKey, handleKeyDown]);
   return (
