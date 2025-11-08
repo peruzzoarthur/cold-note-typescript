@@ -27,21 +27,19 @@ function App() {
 
   const { registerGlobalHandler } = useGlobalKeyboard();
   const {
+    isConfigMenuOpen,
+    toggleConfigMenu,
+    closeConfigMenu,
+    isDebugMenuOpen,
+    toggleDebugMenu,
+    closeDebugMenu,
     addDebugLog,
     debugLogs,
   } = useAppMenus();
 
   const {
-    isAnyModalOpen,
     isCreateDirModalOpen,
-    isConfigModalOpen,
-    isDebugModalOpen,
-    openConfigModal,
-    openDebugModal,
-    closeModal,
     closeCreateDirModal,
-    closeConfigModal,
-    closeDebugModal,
     createDirCallback,
   } = useModal();
 
@@ -69,13 +67,13 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      if (!isAnyModalOpen) {
+      if (!isConfigMenuOpen) {
         const newIndex = (selectedTab + 1) % tabOptions.length;
         setSelectedTab(newIndex);
       }
     },
     onShiftTab: () => {
-      if (!isAnyModalOpen) {
+      if (!isConfigMenuOpen) {
         const newIndex =
           (selectedTab - 1 + tabOptions.length) % tabOptions.length;
         setSelectedTab(newIndex);
@@ -85,30 +83,26 @@ function App() {
 
   const handleGlobalKeys = useCallback(
     (key: KeyEvent): boolean => {
-      // If any modal is open and tab is pressed, don't handle tab navigation
-      if (isAnyModalOpen && key.name === "tab") {
-        return false; // Let the modal handle it
+      if (isConfigMenuOpen && key.name === "tab") {
+        return false; 
       }
 
       if (key.ctrl && key.name === "d") {
-        if (isDebugModalOpen) {
-          closeDebugModal();
-        } else {
-          openDebugModal();
-        }
+        toggleDebugMenu();
         return true;
       }
       if (key.ctrl && (key.name === "," || key.name === "p")) {
-        if (isConfigModalOpen) {
-          closeConfigModal();
-        } else {
-          openConfigModal();
-        }
+        toggleConfigMenu();
         return true;
       }
       if (key.name === "escape") {
-        if (isAnyModalOpen) {
-          closeModal();
+        if (isCreateDirModalOpen) {
+          closeCreateDirModal();
+          return true;
+        }
+        if (isConfigMenuOpen || isDebugMenuOpen) {
+          closeConfigMenu();
+          closeDebugMenu();
           return true;
         }
         return false;
@@ -116,14 +110,15 @@ function App() {
       return false;
     },
     [
-      isAnyModalOpen,
-      isConfigModalOpen,
-      isDebugModalOpen,
-      openConfigModal,
-      openDebugModal,
-      closeModal,
-      closeConfigModal,
-      closeDebugModal,
+      addDebugLog,
+      toggleDebugMenu,
+      toggleConfigMenu,
+      closeConfigMenu,
+      closeDebugMenu,
+      isConfigMenuOpen,
+      isDebugMenuOpen,
+      isCreateDirModalOpen,
+      closeCreateDirModal,
     ],
   );
 
@@ -143,10 +138,10 @@ function App() {
       justifyContent="space-between"
     >
       <ConfigMenu
-        isMenuOpen={isConfigModalOpen}
-        setIsMenuOpen={closeConfigModal}
+        isMenuOpen={isConfigMenuOpen}
+        setIsMenuOpen={closeConfigMenu}
       />
-      <DebugPanel isDebugOpen={isDebugModalOpen} debugLogs={debugLogs} />
+      <DebugPanel isDebugOpen={isDebugMenuOpen} debugLogs={debugLogs} />
       {isCreateDirModalOpen && createDirCallback && (
         <CreateDirModal
           onSubmit={(dirName) => {
@@ -176,8 +171,8 @@ function App() {
 
         {isWideScreen ? (
           <WideScreenLayout
-            isConfigMenuOpen={isConfigModalOpen}
-            isDebugMenuOpen={isDebugModalOpen}
+            isConfigMenuOpen={isConfigMenuOpen}
+            isDebugMenuOpen={isDebugMenuOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}
@@ -190,8 +185,8 @@ function App() {
           />
         ) : (
           <NarrowScreenLayout
-            isConfigMenuOpen={isConfigModalOpen}
-            isDebugMenuOpen={isDebugModalOpen}
+            isConfigMenuOpen={isConfigMenuOpen}
+            isDebugMenuOpen={isDebugMenuOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}
