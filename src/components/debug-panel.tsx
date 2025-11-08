@@ -1,6 +1,7 @@
 import type { KeyEvent } from "@opentui/core";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import { useCallback } from "react";
+import { Modal } from "./Modal";
 
 type DebugPanelProps = {
   isDebugOpen: boolean;
@@ -19,17 +20,12 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
   if (!isDebugOpen) return null;
 
   return (
-    <box
-      style={{
-        position: "absolute",
-        top: "10%",
-        left: "10%",
-        width: "80%",
-        height: "80%",
-        border: true,
-        backgroundColor: "#2A2A40",
-        zIndex: 1000
-      }}
+    <Modal
+      width="80%"
+      height="80%"
+      top="10%"
+      left="10%"
+      backgroundColor="#2A2A40"
     >
       <box flexDirection="column" padding={1}>
         <text marginBottom={1}>
@@ -63,11 +59,11 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
           {debugLogs.map((log, index) => (
             <box
               key={index}
-              style={{ 
-                width: "100%", 
-                padding: 1, 
-                marginBottom: 1, 
-                backgroundColor: index % 2 === 0 ? "#292e42" : "#2f3449" 
+              style={{
+                width: "100%",
+                padding: 1,
+                marginBottom: 1,
+                backgroundColor: index % 2 === 0 ? "#292e42" : "#2f3449"
               }}
             >
               <text content={log} />
@@ -75,6 +71,6 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
           ))}
         </scrollbox>
       </box>
-    </box>
+    </Modal>
   );
 };

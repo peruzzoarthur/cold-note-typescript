@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import { ConfigRepository } from "../database";
 import type { Config } from "../database/types";
 import { useAppMenus } from "../hooks/useAppMenus";
+import { Modal } from "./Modal";
 
 type ConfigMenuProps = {
   isMenuOpen: boolean;
@@ -99,17 +100,12 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
   if (!isMenuOpen) return null;
 
   return (
-    <box
-      style={{
-        position: "absolute",
-        top: "20%",
-        left: "15%",
-        width: "70%",
-        height: "60%",
-        border: true,
-        backgroundColor: "#2A2A40",
-        zIndex: 1000,
-      }}
+    <Modal
+      width="70%"
+      height="60%"
+      top="20%"
+      left="15%"
+      backgroundColor="#2A2A40"
     >
       <box flexDirection="column" padding={2} flexGrow={1}>
         <text marginBottom={2}>
@@ -160,6 +156,6 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
           </box>
         </box>
       </box>
-    </box>
+    </Modal>
   );
 };

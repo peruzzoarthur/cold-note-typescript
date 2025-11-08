@@ -27,19 +27,21 @@ function App() {
 
   const { registerGlobalHandler } = useGlobalKeyboard();
   const {
-    isConfigMenuOpen,
-    toggleConfigMenu,
-    closeConfigMenu,
-    isDebugMenuOpen,
-    toggleDebugMenu,
-    closeDebugMenu,
     addDebugLog,
     debugLogs,
   } = useAppMenus();
 
   const {
+    isAnyModalOpen,
     isCreateDirModalOpen,
+    isConfigModalOpen,
+    isDebugModalOpen,
+    openConfigModal,
+    openDebugModal,
+    closeModal,
     closeCreateDirModal,
+    closeConfigModal,
+    closeDebugModal,
     createDirCallback,
   } = useModal();
 
@@ -67,13 +69,13 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      if (!isConfigMenuOpen && !isCreateDirModalOpen) {
+      if (!isAnyModalOpen) {
         const newIndex = (selectedTab + 1) % tabOptions.length;
         setSelectedTab(newIndex);
       }
     },
     onShiftTab: () => {
-      if (!isConfigMenuOpen && !isCreateDirModalOpen) {
+      if (!isAnyModalOpen) {
         const newIndex =
           (selectedTab - 1 + tabOptions.length) % tabOptions.length;
         setSelectedTab(newIndex);
@@ -83,27 +85,30 @@ function App() {
 
   const handleGlobalKeys = useCallback(
     (key: KeyEvent): boolean => {
-      // If config menu is open, don't handle tab navigation
-      if (isConfigMenuOpen && key.name === "tab") {
-        return false; // Let the config menu handle it
+      // If any modal is open and tab is pressed, don't handle tab navigation
+      if (isAnyModalOpen && key.name === "tab") {
+        return false; // Let the modal handle it
       }
 
       if (key.ctrl && key.name === "d") {
-        toggleDebugMenu();
+        if (isDebugModalOpen) {
+          closeDebugModal();
+        } else {
+          openDebugModal();
+        }
         return true;
       }
       if (key.ctrl && (key.name === "," || key.name === "p")) {
-        toggleConfigMenu();
+        if (isConfigModalOpen) {
+          closeConfigModal();
+        } else {
+          openConfigModal();
+        }
         return true;
       }
       if (key.name === "escape") {
-        if (isCreateDirModalOpen) {
-          closeCreateDirModal();
-          return true;
-        }
-        if (isConfigMenuOpen || isDebugMenuOpen) {
-          closeConfigMenu();
-          closeDebugMenu();
+        if (isAnyModalOpen) {
+          closeModal();
           return true;
         }
         return false;
@@ -111,15 +116,14 @@ function App() {
       return false;
     },
     [
-      addDebugLog,
-      toggleDebugMenu,
-      toggleConfigMenu,
-      closeConfigMenu,
-      closeDebugMenu,
-      isConfigMenuOpen,
-      isDebugMenuOpen,
-      isCreateDirModalOpen,
-      closeCreateDirModal,
+      isAnyModalOpen,
+      isConfigModalOpen,
+      isDebugModalOpen,
+      openConfigModal,
+      openDebugModal,
+      closeModal,
+      closeConfigModal,
+      closeDebugModal,
     ],
   );
 
@@ -139,10 +143,10 @@ function App() {
       justifyContent="space-between"
     >
       <ConfigMenu
-        isMenuOpen={isConfigMenuOpen}
-        setIsMenuOpen={closeConfigMenu}
+        isMenuOpen={isConfigModalOpen}
+        setIsMenuOpen={closeConfigModal}
       />
-      <DebugPanel isDebugOpen={isDebugMenuOpen} debugLogs={debugLogs} />
+      <DebugPanel isDebugOpen={isDebugModalOpen} debugLogs={debugLogs} />
       {isCreateDirModalOpen && createDirCallback && (
         <CreateDirModal
           onSubmit={(dirName) => {
@@ -172,8 +176,8 @@ function App() {
 
         {isWideScreen ? (
           <WideScreenLayout
-            isConfigMenuOpen={isConfigMenuOpen}
-            isDebugMenuOpen={isDebugMenuOpen}
+            isConfigMenuOpen={isConfigModalOpen}
+            isDebugMenuOpen={isDebugModalOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}
@@ -186,8 +190,8 @@ function App() {
           />
         ) : (
           <NarrowScreenLayout
-            isConfigMenuOpen={isConfigMenuOpen}
-            isDebugMenuOpen={isDebugMenuOpen}
+            isConfigMenuOpen={isConfigModalOpen}
+            isDebugMenuOpen={isDebugModalOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}
