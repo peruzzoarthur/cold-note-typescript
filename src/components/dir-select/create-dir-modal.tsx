@@ -1,4 +1,4 @@
-import { TextAttributes, type KeyEvent } from "@opentui/core";
+import { TextAttributes, type KeyEvent, RGBA } from "@opentui/core";
 import { useCallback, useState } from "react";
 
 type CreateDirModalProps = {
@@ -22,35 +22,51 @@ export const CreateDirModal = ({ onSubmit, onCancel }: CreateDirModalProps) => {
   );
 
   return (
-    <box
-      style={{
-        position: "absolute",
-        top: "40%",
-        left: "30%",
-        width: "40%",
-        height: "20%",
-        borderColor: "#CBA6F7",
-        backgroundColor: "#1E1E2F",
-        border: true,
-        zIndex: 1000,
-      }}
-    >
-      <box flexDirection="column" flexGrow={1} >
-        <text marginBottom={1} attributes={TextAttributes.BOLD}>
-          Create New Directory
-        </text>
-        <input
-          placeholder="Directory name..."
-          value={dirName}
-          focused={true}
-          onKeyDown={handleKeyDown}
-          onInput={setDirName}
-          style={{ marginBottom: 1 }}
-        />
-        <text attributes={TextAttributes.DIM}>
-          Enter to create • Esc to cancel
-        </text>
+    <>
+      {/* Backdrop */}
+      <box
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: RGBA.fromInts(0, 0, 0, 128),
+          zIndex: 999,
+        }}
+      />
+
+      {/* Modal */}
+      <box
+        style={{
+          position: "absolute",
+          top: "40%",
+          left: "30%",
+          width: "40%",
+          height: "20%",
+          borderColor: "#CBA6F7",
+          backgroundColor: "#1E1E2F",
+          border: true,
+          zIndex: 1000,
+        }}
+      >
+        <box flexDirection="column" flexGrow={1} >
+          <text marginBottom={1} attributes={TextAttributes.BOLD}>
+            Create New Directory
+          </text>
+          <input
+            placeholder="Directory name..."
+            value={dirName}
+            focused={true}
+            onKeyDown={handleKeyDown}
+            onInput={setDirName}
+            style={{ marginBottom: 1 }}
+          />
+          <text attributes={TextAttributes.DIM}>
+            Enter to create • Esc to cancel
+          </text>
+        </box>
       </box>
-    </box>
+    </>
   );
 };
