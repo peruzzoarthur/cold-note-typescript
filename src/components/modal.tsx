@@ -1,12 +1,12 @@
 import { RGBA } from "@opentui/core";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 type ModalProps = {
   children: ReactNode;
-  width?: string;
-  height?: string;
-  top?: string;
-  left?: string;
+  width?: number | "auto" | `${number}%`;
+  height?: number | "auto" | `${number}%`;
+  top?: number | "auto" | `${number}%`;
+  left?: number | "auto" | `${number}%`;
   borderColor?: string;
   backgroundColor?: string;
   showBackdrop?: boolean;

@@ -1,7 +1,7 @@
 import type { KeyEvent } from "@opentui/core";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import { useCallback } from "react";
-import { Modal } from "./Modal";
+import { Modal } from "./modal";
 
 type DebugPanelProps = {
   isDebugOpen: boolean;

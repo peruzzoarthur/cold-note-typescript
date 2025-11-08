@@ -1,6 +1,6 @@
 import { TextAttributes, type KeyEvent } from "@opentui/core";
 import { useCallback, useState } from "react";
-import { Modal } from "../Modal";
+import { Modal } from "../modal";
 
 type CreateDirModalProps = {
   onSubmit: (dirName: string) => void;

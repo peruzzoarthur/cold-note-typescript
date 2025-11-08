@@ -4,7 +4,7 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import { ConfigRepository } from "../database";
 import type { Config } from "../database/types";
 import { useAppMenus } from "../hooks/useAppMenus";
-import { Modal } from "./Modal";
+import { Modal } from "./modal";
 
 type ConfigMenuProps = {
   isMenuOpen: boolean;
