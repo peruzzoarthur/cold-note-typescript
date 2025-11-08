@@ -19,7 +19,7 @@ import { runMigrations } from "./database";
 import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
 import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
 import { ModalProvider, useModal } from "./contexts/ModalContext";
-import { CreateDirModal } from "./components/dir-select/CreateDirModal";
+import { CreateDirModal } from "./components/dir-select/create-dir-modal";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -67,13 +67,13 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      if (!isConfigMenuOpen) {
+      if (!isConfigMenuOpen && !isCreateDirModalOpen) {
         const newIndex = (selectedTab + 1) % tabOptions.length;
         setSelectedTab(newIndex);
       }
     },
     onShiftTab: () => {
-      if (!isConfigMenuOpen) {
+      if (!isConfigMenuOpen && !isCreateDirModalOpen) {
         const newIndex =
           (selectedTab - 1 + tabOptions.length) % tabOptions.length;
         setSelectedTab(newIndex);
