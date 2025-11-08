@@ -23,7 +23,6 @@ export const CreateDirModal = ({ onSubmit, onCancel }: CreateDirModalProps) => {
 
   return (
     <>
-      {/* Backdrop overlay */}
       <box
         style={{
           position: "absolute",
@@ -32,7 +31,6 @@ export const CreateDirModal = ({ onSubmit, onCancel }: CreateDirModalProps) => {
           right: 0,
           bottom: 0,
           backgroundColor: "#000000",
-          opacity: 0.3,
           zIndex: 999,
         }}
       />
@@ -43,7 +41,6 @@ export const CreateDirModal = ({ onSubmit, onCancel }: CreateDirModalProps) => {
           position: "absolute",
           right: "15%",
           top: "50%",
-          transform: "translateY(-50%)",
           width: 55,
           height: 8,
           border: true,
