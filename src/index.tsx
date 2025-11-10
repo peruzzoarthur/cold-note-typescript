@@ -91,7 +91,7 @@ function App() {
         toggleDebugMenu();
         return true;
       }
-      if (key.ctrl && (key.name === "," || key.name === "p")) {
+      if ((key.ctrl && (key.name === "p")) || key.name === "f1") {
         toggleConfigMenu();
         return true;
       }

@@ -1,4 +1,4 @@
-import type { KeyEvent } from "@opentui/core";
+import { type KeyEvent } from "@opentui/core";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import { useCallback, useState, useEffect, useRef } from "react";
 import { ConfigRepository } from "../database";
@@ -100,59 +100,39 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
   if (!isMenuOpen) return null;
 
   return (
-    <Modal
-      width="70%"
-      height="60%"
-      top="20%"
-      left="15%"
-      backgroundColor="#2A2A40"
-    >
+    <Modal width="50%" height="50%" top="25%" left="25%">
+      <box alignItems="center" justifyContent="center">
+      <ascii-font font="tiny" text="Configuration menu" />
+      </box>
       <box flexDirection="column" padding={2} flexGrow={1}>
-        <text marginBottom={2}>
-          Configuration Settings (Tab to navigate, Enter to save, Escape to
-          close)
-        </text>
-
-        <box flexDirection="column" gap={2}>
-          <box flexDirection="column">
-            <text marginBottom={1}>Obsidian Vault Path:</text>
-            <box border={true} height={3} marginBottom={1}>
-              <input
-                placeholder="Enter path to your Obsidian vault..."
-                value={obsidianVault}
-                focused={activeInput === 0}
-                onKeyDown={handleConfigKeyDown}
-                onInput={(value) => {
-                  obsidianVaultRef.current = value;
-                  setObsidianVault(value);
-                }}
-                style={{ width: "100%" }}
-                backgroundColor="#2A2A40"
-              />
-            </box>
-            <box flexDirection="column">
-              <text marginBottom={1}>Templates Directory:</text>
-              <box border={true} height={3}>
-                <input
-                  placeholder="Enter path to your templates directory..."
-                  value={templatesDir}
-                  focused={activeInput === 1}
-                  onKeyDown={handleConfigKeyDown}
-                  onInput={(value) => {
-                    templatesDirRef.current = value;
-                    setTemplatesDir(value);
-                  }}
-                  style={{ width: "100%" }}
-                  backgroundColor="#2A2A40"
-                />
-              </box>
-            </box>
-          </box>
+        <text marginBottom={1}>Obsidian Vault Path:</text>
+        <box border={true} height={3} marginBottom={1}>
+          <input
+            placeholder="Enter path to your Obsidian vault..."
+            value={obsidianVault}
+            focused={activeInput === 0}
+            onKeyDown={handleConfigKeyDown}
+            onInput={(value) => {
+              obsidianVaultRef.current = value;
+              setObsidianVault(value);
+            }}
+          />
         </box>
-
-        <box flexDirection="row" justifyContent="center" marginTop={3}>
-          <box border={true} padding={1}>
-            <text>Tab: Next Field | Enter: Save | Escape: Cancel</text>
+        <box flexDirection="column">
+          <text marginBottom={1}>Templates Directory:</text>
+          <box border={true} height={3}>
+            <input
+              placeholder="Enter path to your templates directory..."
+              value={templatesDir}
+              focused={activeInput === 1}
+              onKeyDown={handleConfigKeyDown}
+              onInput={(value) => {
+                templatesDirRef.current = value;
+                setTemplatesDir(value);
+              }}
+              style={{ width: "100%" }}
+              backgroundColor="#2A2A40"
+            />
           </box>
         </box>
       </box>
