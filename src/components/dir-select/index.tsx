@@ -60,6 +60,8 @@ export const DirSelect = ({
   const { openModal: openRenameDirModal } = useRenameDir({
     dirPath: currentOption?.value,
     setOptions,
+    selectedDirPath: noteData.dirPath,
+    setSelectedDirPath: setDirPath,
   });
 
   const { isCreateDirModalOpen, isDeleteDirModalOpen, isRenameDirModalOpen } = useModal();

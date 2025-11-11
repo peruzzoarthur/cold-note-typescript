@@ -2,7 +2,6 @@ import { spawn } from "child_process";
 import { useRenderer } from "@opentui/react";
 
 type OpenNoteParams = {
-  setNvimRunning: React.Dispatch<React.SetStateAction<boolean>>;
   fullPath: string;
   dirPath: string;
 };
@@ -10,62 +9,81 @@ type OpenNoteParams = {
 export const useOpenNote = () => {
   const renderer = useRenderer();
 
-  const openNote = async ({
-    setNvimRunning,
-    fullPath,
-    dirPath,
-  }: OpenNoteParams) => {
-
-    // Detect available terminal and spawn nvim in a new terminal window
+  const openNote = async ({ fullPath, dirPath }: OpenNoteParams) => {
     const terminalCommands = [
-      // Try kitty first
-      ['kitty', 'nvim', fullPath],
-      ['konsole', '-e', 'nvim', fullPath],
-      ['gnome-terminal', '--', 'nvim', fullPath],
-      ['xterm', '-e', 'nvim', fullPath],
-      ['alacritty', '-e', 'nvim', fullPath],
-      ['wezterm', 'start', '--', 'nvim', fullPath],
-      ['x-terminal-emulator', '-e', 'nvim', fullPath],
+      ["kitty", "nvim", fullPath],
+      ["konsole", "-e", "nvim", fullPath],
+      ["gnome-terminal", "--", "nvim", fullPath],
+      ["xterm", "-e", "nvim", fullPath],
+      ["alacritty", "-e", "nvim", fullPath],
+      ["wezterm", "start", "--", "nvim", fullPath],
+      ["x-terminal-emulator", "-e", "nvim", fullPath],
     ];
 
     let launched = false;
-    
+
     for (const [terminal, ...args] of terminalCommands) {
       try {
-        const child = spawn(terminal, args, {
-          cwd: dirPath,
+        const child = spawn(terminal as string, args as string[], {
+          cwd: dirPath || undefined,
           detached: true,
-          stdio: 'ignore'
+          stdio: "ignore",
         });
-        
-        // Wait a moment to see if spawn actually succeeds
+
         await new Promise((resolve, reject) => {
-          child.on('error', reject);
-          child.on('spawn', () => {
+          child.on("error", reject);
+          child.on("spawn", () => {
             launched = true;
             console.log(`Opened nvim in ${terminal}`);
-            child.unref(); // Don't wait for the terminal to close
+            child.unref();
             resolve(void 0);
           });
-          
-          // Timeout after 1 second if no spawn event
+
           setTimeout(() => {
             if (!launched) {
-              reject(new Error('Timeout'));
+              reject(new Error("Timeout"));
             }
           }, 1000);
         });
-        
+
         if (launched) break;
       } catch (error) {
-        // Try next terminal
         continue;
       }
     }
 
     if (!launched) {
-      console.error('Could not find a suitable terminal to launch nvim');
-      console.log(`You can manually run: nvim "${fullPath}"`);
+      console.log(
+        "No terminal emulator found, opening nvim in current terminal...",
+      );
+
+      // Fallback: Open nvim directly in the current terminal (blocking)
+      try {
+        renderer.stop();
+
+        const nvimProcess = spawn("nvim", [fullPath], {
+          cwd: dirPath || undefined,
+          stdio: "inherit",
+        });
+
+        await new Promise<void>((resolve, reject) => {
+          nvimProcess.on("exit", (code) => {
+            if (code === 0 || code === null) {
+              console.log("Editor closed");
+              resolve();
+            } else {
+              reject(new Error(`nvim exited with code ${code}`));
+            }
+          });
+
+          nvimProcess.on("error", (error) => {
+            reject(error);
+          });
+        });
+      } catch (error) {
+        console.error("Failed to open nvim:", error);
+        console.log(`You can manually run: nvim "${fullPath}"`);
+      }
     }
   };
 

@@ -16,7 +16,6 @@ type CreateNoteProps = {
 export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
   const { noteData } = useNoteContext();
   const [activeButton, setActiveButton] = useState<number>(0); // 0 for create, 1 for cancel
-  const [nvimRunning, setNvimRunning] = useState<boolean>(false);
   const { addDebugLog } = useAppMenus();
   const openNote = useOpenNote();
 
@@ -27,14 +26,12 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
     const dirPath = noteData.dirPath || process.cwd();
     const fullPath = join(dirPath, fileName);
 
-    // Read template content if a template is selected
     let content = "";
     if (noteData.templatePath) {
       try {
         content = await readFile(noteData.templatePath, "utf-8");
         addDebugLog(`content: ${content}`);
 
-        // Helper function to format dates
         const formatDate = (date: Date, format: string): string => {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -96,11 +93,11 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
 
     await writeFile(fullPath, content);
 
-    await openNote({ setNvimRunning, fullPath, dirPath });
+    await openNote({ fullPath, dirPath });
   };
 
   useKeyboard((key) => {
-    if (nvimRunning || !focused) return; // Don't handle keys when nvim is running or not focused
+    if (!focused) return; // Don't handle keys when not focused
 
     if (key.name === "h" || key.name === "left") {
       setActiveButton(0);
@@ -122,10 +119,6 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
       }
     }
   });
-
-  if (nvimRunning) {
-    return null;
-  }
 
   if (isWideScreen) {
     return (

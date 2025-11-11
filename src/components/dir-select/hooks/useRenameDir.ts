@@ -6,9 +6,11 @@ import { useModal } from "../../../contexts/ModalContext";
 type UseRenameDirProps = {
   dirPath?: string;
   setOptions: React.Dispatch<React.SetStateAction<any[]>>;
+  selectedDirPath: string | null;
+  setSelectedDirPath: (path: string | null) => void;
 };
 
-export const useRenameDir = ({ dirPath, setOptions }: UseRenameDirProps) => {
+export const useRenameDir = ({ dirPath, setOptions, selectedDirPath, setSelectedDirPath }: UseRenameDirProps) => {
   const { openRenameDirModal, setRenameDirCallback, setRenameDirOldName } = useModal();
 
   const renameDirectory = useCallback(
@@ -22,6 +24,11 @@ export const useRenameDir = ({ dirPath, setOptions }: UseRenameDirProps) => {
         const newDirPath = join(parentDir, newName);
 
         renameSync(dirPath, newDirPath);
+
+        // Update the selected path if the renamed directory is currently selected
+        if (selectedDirPath === dirPath) {
+          setSelectedDirPath(newDirPath);
+        }
 
         setOptions((prevOptions) => {
           // Separate the back button from other options
@@ -53,7 +60,7 @@ export const useRenameDir = ({ dirPath, setOptions }: UseRenameDirProps) => {
         console.error("Failed to rename directory:", error);
       }
     },
-    [dirPath, setOptions],
+    [dirPath, setOptions, selectedDirPath, setSelectedDirPath],
   );
 
   const openModal = useCallback(() => {
