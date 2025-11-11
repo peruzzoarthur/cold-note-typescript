@@ -3,10 +3,12 @@ import "../ui/create-button";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useKeyboard } from "@opentui/react";
 import { useState } from "react";
-import { writeFile, readFile } from "fs/promises";
+import { writeFile, readFile, access } from "fs/promises";
 import { join } from "path";
+import { constants } from "fs";
 import { useAppMenus } from "../../hooks/useAppMenus";
 import { useOpenNote } from "./open-note";
+import { useModal } from "../../contexts/ModalContext";
 
 type CreateNoteProps = {
   isWideScreen?: boolean;
@@ -18,6 +20,13 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
   const [activeButton, setActiveButton] = useState<number>(0); // 0 for create, 1 for cancel
   const { addDebugLog } = useAppMenus();
   const openNote = useOpenNote();
+  const {
+    isNoteExistsModalOpen,
+    openNoteExistsModal,
+    closeNoteExistsModal,
+    setNoteExistsCallback,
+    setNoteExistsName,
+  } = useModal();
 
   const createAndOpenNote = async () => {
     const fileName = noteData.noteName
@@ -25,6 +34,20 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
       : "untitled.md";
     const dirPath = noteData.dirPath || process.cwd();
     const fullPath = join(dirPath, fileName);
+
+    // Check if file already exists
+    try {
+      await access(fullPath, constants.F_OK);
+      // File exists, show modal
+      setNoteExistsName(fileName);
+      setNoteExistsCallback(() => async () => {
+        await openNote({ fullPath, dirPath });
+      });
+      openNoteExistsModal();
+      return;
+    } catch {
+      // File doesn't exist, continue with creation
+    }
 
     let content = "";
     if (noteData.templatePath) {
@@ -97,7 +120,7 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
   };
 
   useKeyboard((key) => {
-    if (!focused) return; // Don't handle keys when not focused
+    if (!focused || isNoteExistsModalOpen) return; // Don't handle keys when not focused or modal is open
 
     if (key.name === "h" || key.name === "left") {
       setActiveButton(0);

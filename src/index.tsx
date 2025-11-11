@@ -22,6 +22,7 @@ import { ModalProvider, useModal } from "./contexts/ModalContext";
 import { CreateDirModal } from "./components/dir-select/create-dir-modal";
 import { DeleteDirModal } from "./components/dir-select/delete-dir-modal";
 import { RenameDirModal } from "./components/dir-select/rename-dir-modal";
+import { NoteExistsModal } from "./components/create-note/note-exists-modal";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -52,6 +53,10 @@ function App() {
     closeRenameDirModal,
     renameDirCallback,
     renameDirOldName,
+    isNoteExistsModalOpen,
+    closeNoteExistsModal,
+    noteExistsCallback,
+    noteExistsName,
   } = useModal();
 
   const { width, height } = useTerminalDimensions()
@@ -94,7 +99,7 @@ function App() {
 
   const handleGlobalKeys = useCallback(
     (key: KeyEvent): boolean => {
-      if (key.name === "tab" && (isConfigMenuOpen || isCreateDirModalOpen || isDeleteDirModalOpen)) {
+      if (key.name === "tab" && (isConfigMenuOpen || isCreateDirModalOpen || isDeleteDirModalOpen || isRenameDirModalOpen || isNoteExistsModalOpen)) {
         return true;
       }
 
@@ -117,6 +122,10 @@ function App() {
         }
         if (isRenameDirModalOpen) {
           closeRenameDirModal();
+          return true;
+        }
+        if (isNoteExistsModalOpen) {
+          closeNoteExistsModal();
           return true;
         }
         if (isConfigMenuOpen || isDebugMenuOpen) {
@@ -142,6 +151,8 @@ function App() {
       closeDeleteDirModal,
       isRenameDirModalOpen,
       closeRenameDirModal,
+      isNoteExistsModalOpen,
+      closeNoteExistsModal,
     ],
   );
 
@@ -192,6 +203,16 @@ function App() {
             closeRenameDirModal();
           }}
           onCancel={closeRenameDirModal}
+        />
+      )}
+      {isNoteExistsModalOpen && noteExistsCallback && noteExistsName && (
+        <NoteExistsModal
+          noteName={noteExistsName}
+          onOpenExisting={() => {
+            noteExistsCallback();
+            closeNoteExistsModal();
+          }}
+          onCancel={closeNoteExistsModal}
         />
       )}
       <box
