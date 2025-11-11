@@ -1,4 +1,8 @@
-import { KeyEvent, type SelectOption, type SelectRenderable } from "@opentui/core";
+import {
+  KeyEvent,
+  type SelectOption,
+  type SelectRenderable,
+} from "@opentui/core";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
@@ -34,7 +38,7 @@ export const TagsSelect = ({
   const [searchInput, setSearchInput] = useState("");
   const [isInputMode, setIsInputMode] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
-  const [activeButton, setActiveButton] = useState(0); // 0 for add, 1 for search
+  const [activeButton, setActiveButton] = useState(0); 
 
   useEffect(() => {
     if (tagRepository) {
@@ -44,7 +48,7 @@ export const TagsSelect = ({
 
   const loadTags = useCallback(() => {
     if (!tagRepository) return;
-    
+
     try {
       const tags = tagRepository.findAll();
       setAvailableTags(tags);
@@ -57,7 +61,7 @@ export const TagsSelect = ({
   const handleSearch = useCallback(
     (query: string) => {
       if (!tagRepository) return;
-      
+
       if (!query.trim()) {
         setFilteredTags(availableTags);
       } else {
@@ -130,7 +134,7 @@ export const TagsSelect = ({
     if (handleGlobalKey(key)) {
       return;
     }
-    
+
     if (key.name === "return" || key.name === "enter") {
       if (activeButton === 0) {
         handleAddTag();
@@ -148,7 +152,7 @@ export const TagsSelect = ({
     if (handleGlobalKey(key)) {
       return;
     }
-    
+
     if (key.name === "escape") {
       setIsSearchMode(false);
       setSearchInput("");
@@ -163,7 +167,7 @@ export const TagsSelect = ({
     if (handleGlobalKey(key)) {
       return;
     }
-    
+
     if (key.name === "space") {
       const currentIndex = selectRef.current?.getSelectedIndex?.() || 0;
       const currentOption = displayOptions[currentIndex] ?? null;
@@ -178,27 +182,6 @@ export const TagsSelect = ({
       setActiveButton(0);
     } else if (key.name === "right") {
       setActiveButton(1);
-    }
-  };
-
-  const handleButtonNavigation = (key: KeyEvent) => {
-    // Check global keys first
-    if (handleGlobalKey(key)) {
-      return;
-    }
-    
-    if (key.name === "left") {
-      setActiveButton(0);
-    } else if (key.name === "right") {
-      setActiveButton(1);
-    } else if (key.name === "return" || key.name === "enter") {
-      if (activeButton === 0) {
-        setIsInputMode(true);
-      } else if (activeButton === 1) {
-        setIsSearchMode(true);
-      }
-    } else if (key.name === "tab") {
-      handleTabNavigation(key);
     }
   };
 
@@ -266,7 +249,7 @@ export const TagsSelect = ({
 
   return (
     <box style={{ paddingLeft: 1, paddingRight: 1 }}>
-      <box style={{ flexDirection: "column" }}>
+      <box style={{ flexDirection: "column", width: 60 }}>
         <box
           style={{
             height: 10,
@@ -286,20 +269,7 @@ export const TagsSelect = ({
             style={{ flexGrow: 1 }}
           />
         </box>
-        <box style={{ flexDirection: "row", justifyContent: "center" }}>
-          {/* <createButton */}
-          {/*   label="New Tag (n)" */}
-          {/*   focused={focused && !isInputMode && !isSearchMode && activeButton === 0} */}
-          {/*   width={20} */}
-          {/*   onKeyDown={handleButtonNavigation} */}
-          {/* /> */}
-          {/* <createButton */}
-          {/*   label="Search (s)" */}
-          {/*   focused={focused && !isInputMode && !isSearchMode && activeButton === 1} */}
-          {/*   width={20} */}
-          {/*   onKeyDown={handleButtonNavigation} */}
-          {/* /> */}
-        </box>
+        <box style={{ flexDirection: "row", justifyContent: "center" }}></box>
         <text>Space: toggle | n: new | s: search | Enter: next</text>
       </box>
     </box>

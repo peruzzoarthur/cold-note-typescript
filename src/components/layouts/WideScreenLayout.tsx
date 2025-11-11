@@ -29,7 +29,7 @@ export const WideScreenLayout = ({
         justifyContent: "flex-start",
         alignItems: "center",
         width: "100%",
-        maxWidth: width - 6,
+        maxWidth: width,
         padding: 2,
       }}
     >
@@ -68,7 +68,6 @@ export const WideScreenLayout = ({
           alignItems: "flex-start",
           gap: 4,
           width: "100%",
-          minHeight: 12,
         }}
       >
         <DirSelect
@@ -95,7 +94,6 @@ export const WideScreenLayout = ({
           alignItems: "flex-start",
           gap: 4,
           width: "100%",
-          minHeight: 12,
         }}
       >
         <TagsSelect
@@ -109,8 +107,8 @@ export const WideScreenLayout = ({
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
-            width: "34%",
-            minHeight: 12,
+            width: 62,
+            minHeight: 10,
           }}
         >
           {isCreateTabActive() ? (

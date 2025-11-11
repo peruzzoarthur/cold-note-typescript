@@ -126,6 +126,8 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
+            paddingLeft: 1,
+            paddingRight: 1,
           }}
         >
           <createButton

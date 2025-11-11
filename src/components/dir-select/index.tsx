@@ -65,7 +65,7 @@ export const DirSelect = ({
     <box style={{ paddingLeft: 1, paddingRight: 1 }}>
       <box
         style={{
-          height: 12,
+          height: 10,
           width: 60,
           marginBottom: 1,
           border: true,
