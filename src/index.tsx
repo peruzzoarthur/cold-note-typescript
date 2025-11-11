@@ -73,13 +73,13 @@ function App() {
 
   useNavigation({
     onTab: () => {
-      if (!isConfigMenuOpen) {
+      if (!isConfigMenuOpen && !isAnyModalOpen) {
         const newIndex = (selectedTab + 1) % tabOptions.length;
         setSelectedTab(newIndex);
       }
     },
     onShiftTab: () => {
-      if (!isConfigMenuOpen) {
+      if (!isConfigMenuOpen && !isAnyModalOpen) {
         const newIndex =
           (selectedTab - 1 + tabOptions.length) % tabOptions.length;
         setSelectedTab(newIndex);
