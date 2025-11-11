@@ -94,7 +94,6 @@ function App() {
 
   const handleGlobalKeys = useCallback(
     (key: KeyEvent): boolean => {
-      // Block tab navigation when modals or menus are open
       if (key.name === "tab" && (isConfigMenuOpen || isCreateDirModalOpen || isDeleteDirModalOpen)) {
         return true;
       }

@@ -52,18 +52,16 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        // Format tags for YAML (array format)
         const yamlTags = noteData.selectedTags.length > 0
           ? noteData.selectedTags.map((tag) => `  - ${tag}`).join("\n")
           : "  []";
 
-        // Format tags for markdown (hashtag format)
         const markdownTags = noteData.selectedTags.map((tag) => `#${tag}`).join(" ");
 
-        // Format aliases for YAML (array format)
         const aliasesArray = noteData.aliases
           ? noteData.aliases.split(",").map(a => a.trim()).filter(a => a.length > 0)
           : [];
+
         const yamlAliases = aliasesArray.length > 0
           ? aliasesArray.map((alias) => `  - ${alias}`).join("\n")
           : "  []";
@@ -72,7 +70,6 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
           .replace(/{{title}}/g, noteData.noteName || "Untitled")
           .replace(/{{date}}/g, new Date().toISOString())
           .replace(/{{datetime}}/g, new Date().toISOString())
-          // Handle date formatting patterns
           .replace(/{{date:([\w-]+)}}/g, (match, format) =>
             formatDate(today, format),
           )
@@ -82,10 +79,8 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
           .replace(/{{tomorrow:([\w-]+)}}/g, (match, format) =>
             formatDate(tomorrow, format),
           )
-          // Handle tags with format specifier
           .replace(/{{tags:yaml}}/g, yamlTags)
           .replace(/{{tags}}/g, markdownTags)
-          // Handle aliases with format specifier
           .replace(/{{aliases:yaml}}/g, yamlAliases)
           .replace(/{{aliases}}/g, noteData.aliases ?? "");
       } catch (templateError) {
@@ -104,7 +99,6 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
     await openNote({ setNvimRunning, fullPath, dirPath });
   };
 
-  // Only handle keyboard events when focused
   useKeyboard((key) => {
     if (nvimRunning || !focused) return; // Don't handle keys when nvim is running or not focused
 
@@ -113,14 +107,12 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
     } else if (key.name === "l" || key.name === "right") {
       setActiveButton(1);
     } else if (key.name === "return" || key.name === "enter") {
-      // Only respond to Enter, not Space, when focused
       if (activeButton === 0) {
         createAndOpenNote();
       } else {
         console.log("Cancel button activated!");
       }
     } else if (key.name === "space") {
-      // Space can still be used for button navigation in narrow screen
       if (!isWideScreen) {
         if (activeButton === 0) {
           createAndOpenNote();
