@@ -20,6 +20,7 @@ import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
 import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
 import { ModalProvider, useModal } from "./contexts/ModalContext";
 import { CreateDirModal } from "./components/dir-select/create-dir-modal";
+import { DeleteDirModal } from "./components/dir-select/delete-dir-modal";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -38,9 +39,14 @@ function App() {
   } = useAppMenus();
 
   const {
+    isAnyModalOpen,
     isCreateDirModalOpen,
     closeCreateDirModal,
     createDirCallback,
+    isDeleteDirModalOpen,
+    closeDeleteDirModal,
+    deleteDirCallback,
+    deleteDirName,
   } = useModal();
 
   const { width, height } = useTerminalDimensions()
@@ -83,8 +89,9 @@ function App() {
 
   const handleGlobalKeys = useCallback(
     (key: KeyEvent): boolean => {
-      if (isConfigMenuOpen && key.name === "tab") {
-        return false; 
+      // Block tab navigation when modals or menus are open
+      if (key.name === "tab" && (isConfigMenuOpen || isCreateDirModalOpen || isDeleteDirModalOpen)) {
+        return true;
       }
 
       if (key.ctrl && key.name === "d") {
@@ -98,6 +105,10 @@ function App() {
       if (key.name === "escape") {
         if (isCreateDirModalOpen) {
           closeCreateDirModal();
+          return true;
+        }
+        if (isDeleteDirModalOpen) {
+          closeDeleteDirModal();
           return true;
         }
         if (isConfigMenuOpen || isDebugMenuOpen) {
@@ -119,6 +130,8 @@ function App() {
       isDebugMenuOpen,
       isCreateDirModalOpen,
       closeCreateDirModal,
+      isDeleteDirModalOpen,
+      closeDeleteDirModal,
     ],
   );
 
@@ -151,6 +164,16 @@ function App() {
           onCancel={closeCreateDirModal}
         />
       )}
+      {isDeleteDirModalOpen && deleteDirCallback && deleteDirName && (
+        <DeleteDirModal
+          dirName={deleteDirName}
+          onConfirm={() => {
+            deleteDirCallback();
+            closeDeleteDirModal();
+          }}
+          onCancel={closeDeleteDirModal}
+        />
+      )}
       <box
         backgroundColor="#1E1E2F"
         justifyContent="center"
@@ -173,6 +196,7 @@ function App() {
           <WideScreenLayout
             isConfigMenuOpen={isConfigMenuOpen}
             isDebugMenuOpen={isDebugMenuOpen}
+            isAnyModalOpen={isAnyModalOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}
@@ -187,6 +211,7 @@ function App() {
           <NarrowScreenLayout
             isConfigMenuOpen={isConfigMenuOpen}
             isDebugMenuOpen={isDebugMenuOpen}
+            isAnyModalOpen={isAnyModalOpen}
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             tabOptions={tabOptions}

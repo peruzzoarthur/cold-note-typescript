@@ -9,6 +9,7 @@ import type { LayoutProps } from "./types";
 export const NarrowScreenLayout = ({
   isConfigMenuOpen,
   isDebugMenuOpen,
+  isAnyModalOpen,
   selectedTab,
   setSelectedTab,
   tabOptions,
@@ -19,6 +20,8 @@ export const NarrowScreenLayout = ({
   isAliasesTabActive,
   isCreateTabActive,
 }: LayoutProps) => {
+  const canFocus = !isConfigMenuOpen && !isDebugMenuOpen && !isAnyModalOpen;
+
   return (
     <box
       style={{
@@ -31,7 +34,7 @@ export const NarrowScreenLayout = ({
     >
       {isNameTabActive() && (
         <NoteNameInput
-          focused={!isConfigMenuOpen && !isDebugMenuOpen}
+          focused={canFocus}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -40,7 +43,7 @@ export const NarrowScreenLayout = ({
 
       {isDirsTabActive() && (
         <DirSelect
-          focused={!isConfigMenuOpen && !isDebugMenuOpen}
+          focused={canFocus}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -49,7 +52,7 @@ export const NarrowScreenLayout = ({
 
       {isTemplateTabActive() && (
         <TemplateSelect
-          focused={!isConfigMenuOpen && !isDebugMenuOpen}
+          focused={canFocus}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -58,7 +61,7 @@ export const NarrowScreenLayout = ({
 
       {isTagsTabActive() && (
         <TagsSelect
-          focused={!isConfigMenuOpen && !isDebugMenuOpen}
+          focused={canFocus}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -67,7 +70,7 @@ export const NarrowScreenLayout = ({
 
       {isAliasesTabActive() && (
         <AliasesInput
-          focused={!isConfigMenuOpen && !isDebugMenuOpen}
+          focused={canFocus}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -75,9 +78,9 @@ export const NarrowScreenLayout = ({
       )}
 
       {isCreateTabActive() && (
-        <CreateNote 
-          isWideScreen={false} 
-          focused={!isConfigMenuOpen && !isDebugMenuOpen} 
+        <CreateNote
+          isWideScreen={false}
+          focused={canFocus}
         />
       )}
     </box>

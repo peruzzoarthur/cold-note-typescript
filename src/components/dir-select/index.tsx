@@ -9,6 +9,7 @@ import { useDirSelection } from "./hooks/useDirSelection";
 import { useSelectSync } from "./hooks/useSelectSync";
 import { useDirNavigationHandlers } from "./hooks/useDirNavigationHandlers";
 import { useCreateDir } from "./hooks/useCreateDir";
+import { useDeleteDir } from "./hooks/useDeleteDir";
 import { useModal } from "../../contexts/ModalContext";
 
 type DirSelectProps = {
@@ -45,12 +46,17 @@ export const DirSelect = ({
     selectedPath: noteData.dirPath,
   });
 
-  const { openModal } = useCreateDir({
+  const { openModal: openCreateDirModal } = useCreateDir({
     currentPath: path,
     setOptions,
   });
 
-  const { isCreateDirModalOpen } = useModal();
+  const { openModal: openDeleteDirModal } = useDeleteDir({
+    dirPath: currentOption?.value,
+    setOptions,
+  });
+
+  const { isCreateDirModalOpen, isDeleteDirModalOpen } = useModal();
 
   const { handleNavigationKeyDown } = useDirNavigationHandlers({
     currentOption,
@@ -58,7 +64,8 @@ export const DirSelect = ({
     handleNavigateDir,
     handleGlobalKey,
     handleKeyDown,
-    onCreateDir: openModal,
+    onCreateDir: openCreateDirModal,
+    onDeleteDir: openDeleteDirModal,
   });
 
   return (
@@ -73,7 +80,7 @@ export const DirSelect = ({
       >
         <select
           ref={selectRef}
-          focused={focused && !isCreateDirModalOpen}
+          focused={focused && !isCreateDirModalOpen && !isDeleteDirModalOpen}
           onChange={(_, option) => {
             setCurrentOption(option || null);
             setDirPath(option?.value);

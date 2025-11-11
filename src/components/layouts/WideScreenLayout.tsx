@@ -10,6 +10,7 @@ import type { LayoutProps } from "./types";
 export const WideScreenLayout = ({
   isConfigMenuOpen,
   isDebugMenuOpen,
+  isAnyModalOpen,
   selectedTab,
   setSelectedTab,
   tabOptions,
@@ -21,6 +22,7 @@ export const WideScreenLayout = ({
   isCreateTabActive,
 }: LayoutProps) => {
   const { width } = useTerminalDimensions();
+  const canFocus = !isConfigMenuOpen && !isDebugMenuOpen && !isAnyModalOpen;
 
   return (
     <box
@@ -45,15 +47,13 @@ export const WideScreenLayout = ({
         }}
       >
         <NoteNameInput
-          focused={!isConfigMenuOpen && !isDebugMenuOpen && isNameTabActive()}
+          focused={canFocus && isNameTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
         />
         <AliasesInput
-          focused={
-            !isConfigMenuOpen && !isDebugMenuOpen && isAliasesTabActive()
-          }
+          focused={canFocus && isAliasesTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -71,15 +71,13 @@ export const WideScreenLayout = ({
         }}
       >
         <DirSelect
-          focused={!isConfigMenuOpen && !isDebugMenuOpen && isDirsTabActive()}
+          focused={canFocus && isDirsTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
         />
         <TemplateSelect
-          focused={
-            !isConfigMenuOpen && !isDebugMenuOpen && isTemplateTabActive()
-          }
+          focused={canFocus && isTemplateTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -97,7 +95,7 @@ export const WideScreenLayout = ({
         }}
       >
         <TagsSelect
-          focused={!isConfigMenuOpen && !isDebugMenuOpen && isTagsTabActive()}
+          focused={canFocus && isTagsTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
@@ -111,11 +109,10 @@ export const WideScreenLayout = ({
             minHeight: 10,
           }}
         >
-          {isCreateTabActive() ? (
-            <CreateNote isWideScreen={true} focused={true} />
-          ) : (
-              <CreateNote isWideScreen={true} focused={false} />
-            )}
+          <CreateNote
+            isWideScreen={true}
+            focused={canFocus && isCreateTabActive()}
+          />
         </box>
       </box>
     </box>
