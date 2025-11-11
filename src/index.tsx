@@ -21,6 +21,7 @@ import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
 import { ModalProvider, useModal } from "./contexts/ModalContext";
 import { CreateDirModal } from "./components/dir-select/create-dir-modal";
 import { DeleteDirModal } from "./components/dir-select/delete-dir-modal";
+import { RenameDirModal } from "./components/dir-select/rename-dir-modal";
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -47,6 +48,10 @@ function App() {
     closeDeleteDirModal,
     deleteDirCallback,
     deleteDirName,
+    isRenameDirModalOpen,
+    closeRenameDirModal,
+    renameDirCallback,
+    renameDirOldName,
   } = useModal();
 
   const { width, height } = useTerminalDimensions()
@@ -111,6 +116,10 @@ function App() {
           closeDeleteDirModal();
           return true;
         }
+        if (isRenameDirModalOpen) {
+          closeRenameDirModal();
+          return true;
+        }
         if (isConfigMenuOpen || isDebugMenuOpen) {
           closeConfigMenu();
           closeDebugMenu();
@@ -132,6 +141,8 @@ function App() {
       closeCreateDirModal,
       isDeleteDirModalOpen,
       closeDeleteDirModal,
+      isRenameDirModalOpen,
+      closeRenameDirModal,
     ],
   );
 
@@ -172,6 +183,16 @@ function App() {
             closeDeleteDirModal();
           }}
           onCancel={closeDeleteDirModal}
+        />
+      )}
+      {isRenameDirModalOpen && renameDirCallback && renameDirOldName && (
+        <RenameDirModal
+          oldName={renameDirOldName}
+          onSubmit={(newName) => {
+            renameDirCallback(newName);
+            closeRenameDirModal();
+          }}
+          onCancel={closeRenameDirModal}
         />
       )}
       <box

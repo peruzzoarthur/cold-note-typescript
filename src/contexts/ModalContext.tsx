@@ -1,21 +1,24 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-export type ModalType = "createDir" | "deleteDir" | "config" | "debug" | null;
+export type ModalType = "createDir" | "deleteDir" | "renameDir" | "config" | "debug" | null;
 
 type ModalContextType = {
   openModal: ModalType;
   isAnyModalOpen: boolean;
   isCreateDirModalOpen: boolean;
   isDeleteDirModalOpen: boolean;
+  isRenameDirModalOpen: boolean;
   isConfigModalOpen: boolean;
   isDebugModalOpen: boolean;
   openCreateDirModal: () => void;
   openDeleteDirModal: () => void;
+  openRenameDirModal: () => void;
   openConfigModal: () => void;
   openDebugModal: () => void;
   closeModal: () => void;
   closeCreateDirModal: () => void;
   closeDeleteDirModal: () => void;
+  closeRenameDirModal: () => void;
   closeConfigModal: () => void;
   closeDebugModal: () => void;
   createDirCallback: ((dirName: string) => void) | null;
@@ -24,6 +27,10 @@ type ModalContextType = {
   setDeleteDirCallback: (callback: () => void) => void;
   deleteDirName: string | null;
   setDeleteDirName: (name: string) => void;
+  renameDirCallback: ((newName: string) => void) | null;
+  setRenameDirCallback: (callback: (newName: string) => void) => void;
+  renameDirOldName: string | null;
+  setRenameDirOldName: (name: string) => void;
 };
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -37,15 +44,21 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     (() => void) | null
   >(null);
   const [deleteDirName, setDeleteDirName] = useState<string | null>(null);
+  const [renameDirCallback, setRenameDirCallback] = useState<
+    ((newName: string) => void) | null
+  >(null);
+  const [renameDirOldName, setRenameDirOldName] = useState<string | null>(null);
 
   const isAnyModalOpen = openModal !== null;
   const isCreateDirModalOpen = openModal === "createDir";
   const isDeleteDirModalOpen = openModal === "deleteDir";
+  const isRenameDirModalOpen = openModal === "renameDir";
   const isConfigModalOpen = openModal === "config";
   const isDebugModalOpen = openModal === "debug";
 
   const openCreateDirModal = () => setOpenModal("createDir");
   const openDeleteDirModal = () => setOpenModal("deleteDir");
+  const openRenameDirModal = () => setOpenModal("renameDir");
   const openConfigModal = () => setOpenModal("config");
   const openDebugModal = () => setOpenModal("debug");
 
@@ -54,10 +67,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     setCreateDirCallback(null);
     setDeleteDirCallback(null);
     setDeleteDirName(null);
+    setRenameDirCallback(null);
+    setRenameDirOldName(null);
   };
 
   const closeCreateDirModal = closeModal;
   const closeDeleteDirModal = closeModal;
+  const closeRenameDirModal = closeModal;
   const closeConfigModal = closeModal;
   const closeDebugModal = closeModal;
 
@@ -68,6 +84,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         isAnyModalOpen,
         isCreateDirModalOpen,
         isDeleteDirModalOpen,
+        isRenameDirModalOpen,
         isConfigModalOpen,
         isDebugModalOpen,
         openCreateDirModal,
@@ -85,6 +102,12 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         setDeleteDirCallback,
         deleteDirName,
         setDeleteDirName,
+        openRenameDirModal,
+        closeRenameDirModal,
+        renameDirCallback,
+        setRenameDirCallback,
+        renameDirOldName,
+        setRenameDirOldName,
       }}
     >
       {children}

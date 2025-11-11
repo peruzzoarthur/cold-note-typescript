@@ -52,6 +52,22 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
+        // Format tags for YAML (array format)
+        const yamlTags = noteData.selectedTags.length > 0
+          ? noteData.selectedTags.map((tag) => `  - ${tag}`).join("\n")
+          : "  []";
+
+        // Format tags for markdown (hashtag format)
+        const markdownTags = noteData.selectedTags.map((tag) => `#${tag}`).join(" ");
+
+        // Format aliases for YAML (array format)
+        const aliasesArray = noteData.aliases
+          ? noteData.aliases.split(",").map(a => a.trim()).filter(a => a.length > 0)
+          : [];
+        const yamlAliases = aliasesArray.length > 0
+          ? aliasesArray.map((alias) => `  - ${alias}`).join("\n")
+          : "  []";
+
         content = content
           .replace(/{{title}}/g, noteData.noteName || "Untitled")
           .replace(/{{date}}/g, new Date().toISOString())
@@ -66,10 +82,11 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
           .replace(/{{tomorrow:([\w-]+)}}/g, (match, format) =>
             formatDate(tomorrow, format),
           )
-          .replace(
-            /{{tags}}/g,
-            noteData.selectedTags.map((tag) => `#${tag}`).join(" "),
-          )
+          // Handle tags with format specifier
+          .replace(/{{tags:yaml}}/g, yamlTags)
+          .replace(/{{tags}}/g, markdownTags)
+          // Handle aliases with format specifier
+          .replace(/{{aliases:yaml}}/g, yamlAliases)
           .replace(/{{aliases}}/g, noteData.aliases ?? "");
       } catch (templateError) {
         console.error("Failed to read template:", templateError);

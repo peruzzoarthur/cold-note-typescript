@@ -9,6 +9,7 @@ type UseDirNavigationHandlersProps = {
   handleKeyDown: (key: KeyEvent) => void;
   onCreateDir?: () => void;
   onDeleteDir?: () => void;
+  onRenameDir?: () => void;
 };
 
 export const useDirNavigationHandlers = ({
@@ -19,6 +20,7 @@ export const useDirNavigationHandlers = ({
   handleKeyDown,
   onCreateDir,
   onDeleteDir,
+  onRenameDir,
 }: UseDirNavigationHandlersProps) => {
 
   const handleSelectKeyDown = useCallback(
@@ -51,9 +53,16 @@ export const useDirNavigationHandlers = ({
           return;
         }
       }
+      if (key.name === "r" && currentOption?.value && onRenameDir) {
+        // Don't allow renaming the "go back" option
+        if (currentOption.name !== "Press '-' to go back...") {
+          onRenameDir();
+          return;
+        }
+      }
       handleSelectKeyDown(key);
     },
-    [currentOption, path, handleNavigateDir, handleSelectKeyDown, onCreateDir, onDeleteDir],
+    [currentOption, path, handleNavigateDir, handleSelectKeyDown, onCreateDir, onDeleteDir, onRenameDir],
   );
 
   return { handleNavigationKeyDown };
