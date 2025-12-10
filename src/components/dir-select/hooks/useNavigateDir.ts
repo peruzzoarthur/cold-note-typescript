@@ -5,13 +5,13 @@ export const useNavigateDir = (
   rootPath?: string,
 ) => {
   const handleNavigateDir = (key: KeyEvent, name: string): void => {
-    if (key.name === "o") {
+    if (key.name === "o" || key.name === "l") {
       setPath(name);
     }
 
-    if (key.name === "-" && name !== rootPath) {
+    if ((key.name === "-" || key.name === "h") && name !== rootPath) {
       const pathParts = name.split('/').filter(Boolean);
-      pathParts.pop(); 
+      pathParts.pop();
       const parentPath = '/' + pathParts.join('/');
       setPath(parentPath);
     }

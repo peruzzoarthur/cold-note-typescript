@@ -20,7 +20,6 @@ export const useDeleteDir = ({ dirPath, setOptions }: UseDeleteDirProps) => {
       rmSync(dirPath, { recursive: true, force: true });
 
       setOptions((prevOptions) => {
-        // Remove the deleted directory from options
         return prevOptions.filter(opt => opt.value !== dirPath);
       });
     } catch (error) {

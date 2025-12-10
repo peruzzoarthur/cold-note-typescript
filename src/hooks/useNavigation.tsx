@@ -1,5 +1,6 @@
+import type { KeyEvent } from "@opentui/core";
 import { useKeyboard } from "@opentui/react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 export type VimKeyHandler = {
   onLeft?: () => void;
@@ -15,56 +16,31 @@ export type VimKeyHandler = {
 };
 
 export const useNavigation = (handlers: VimKeyHandler) => {
-  const handleKeyPress = useCallback((key: any) => {
-    if (key.name === 'h' || key.name === 'left') {
-      handlers.onLeft?.();
-    } else if (key.name === 'l' || key.name === 'right') {
-      handlers.onRight?.();
-    } else if (key.name === 'k' || key.name === 'up') {
-      handlers.onUp?.();
-    } else if (key.name === 'j' || key.name === 'down') {
-      handlers.onDown?.();
-    } else if (key.name === 'tab' && key.shift) {
-      handlers.onShiftTab?.();
-    } else if (key.name === 'tab') {
-      handlers.onTab?.();
-    } else if (key.name === 'return' || key.name === 'enter') {
-      handlers.onEnter?.();
-    } else if (key.name === 'space') {
-      handlers.onSpace?.();
-    } else if (key.name === 'escape') {
-      handlers.onEscape?.();
-    } else {
-      handlers.onCustom?.(key.name || key);
-    }
-  }, [handlers]);
+  const handleKeyPress = useCallback(
+    (key: KeyEvent) => {
+      // if (key.name === 'h' || key.name === 'left') {
+      //   handlers.onLeft?.();
+      // } else if (key.name === 'l' || key.name === 'right') {
+      //   handlers.onRight?.();
+      // } else if (key.name === 'k' || key.name === 'up') {
+      //   handlers.onUp?.();
+      // } else if (key.name === 'j' || key.name === 'down') {
+      //   handlers.onDown?.();
+      // }
+      if (key.name === "tab" && key.shift) {
+        handlers.onShiftTab?.();
+      } else if (key.name === "tab") {
+        handlers.onTab?.();
+      } else if (key.name === "return" || key.name === "enter") {
+        handlers.onEnter?.();
+      } else if (key.name === "space") {
+        handlers.onSpace?.();
+      } else if (key.name === "escape") {
+        handlers.onEscape?.();
+      }
+    },
+    [handlers],
+  );
 
   useKeyboard(handleKeyPress);
-};
-
-export type NavigationState = {
-  currentIndex: number;
-  maxIndex: number;
-};
-
-export const useVimNavigation = (maxIndex: number, initialIndex: number = 0) => {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-
-  const handlers: VimKeyHandler = {
-    onLeft: () => setCurrentIndex(prev => Math.max(0, prev - 1)),
-    onRight: () => setCurrentIndex(prev => Math.min(maxIndex - 1, prev + 1)),
-    onUp: () => setCurrentIndex(prev => Math.max(0, prev - 1)),
-    onDown: () => setCurrentIndex(prev => Math.min(maxIndex - 1, prev + 1)),
-  };
-
-  useNavigation(handlers);
-
-  return {
-    currentIndex,
-    setCurrentIndex,
-    goLeft: handlers.onLeft!,
-    goRight: handlers.onRight!,
-    goUp: handlers.onUp!,
-    goDown: handlers.onDown!,
-  };
 };

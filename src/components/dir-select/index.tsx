@@ -1,3 +1,4 @@
+import type { KeyEvent } from "@opentui/core";
 import { useGlobalKeyboard } from "../../contexts/GlobalKeyboardContext";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useTabNavigation } from "../../hooks/useTabNavigation";
@@ -35,8 +36,14 @@ export const DirSelect = ({
   const { handleGlobalKey } = useGlobalKeyboard();
 
   const { vaultRoot } = useVaultConfig();
-  const { options, setOptions, path, setPath, currentOption, setCurrentOption } =
-    useDirSelection();
+  const {
+    options,
+    setOptions,
+    path,
+    setPath,
+    currentOption,
+    setCurrentOption,
+  } = useDirSelection();
 
   const { handleNavigateDir } = useNavigateDir(setPath, vaultRoot);
 
@@ -64,7 +71,8 @@ export const DirSelect = ({
     setSelectedDirPath: setDirPath,
   });
 
-  const { isCreateDirModalOpen, isDeleteDirModalOpen, isRenameDirModalOpen } = useModal();
+  const { isCreateDirModalOpen, isDeleteDirModalOpen, isRenameDirModalOpen } =
+    useModal();
 
   const { handleNavigationKeyDown } = useDirNavigationHandlers({
     currentOption,
@@ -89,7 +97,12 @@ export const DirSelect = ({
       >
         <select
           ref={selectRef}
-          focused={focused && !isCreateDirModalOpen && !isDeleteDirModalOpen && !isRenameDirModalOpen}
+          focused={
+            focused &&
+            !isCreateDirModalOpen &&
+            !isDeleteDirModalOpen &&
+            !isRenameDirModalOpen
+          }
           onChange={(_, option) => {
             setCurrentOption(option || null);
             setDirPath(option?.value);

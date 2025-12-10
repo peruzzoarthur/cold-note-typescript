@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode, useCallback, useState } from 'react';
 import type { KeyEvent } from '@opentui/core';
 
-type GlobalKeyHandler = (key: KeyEvent) => boolean; // return true if handled
+type GlobalKeyHandler = (key: KeyEvent) => boolean; 
 
 interface GlobalKeyboardContextType {
   registerGlobalHandler: (handler: GlobalKeyHandler) => void;

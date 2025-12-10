@@ -1,5 +1,6 @@
 import type { KeyEvent, SelectOption } from "@opentui/core";
 import { useCallback } from "react";
+import { useAppMenus } from "../../../hooks/useAppMenus";
 
 type UseDirNavigationHandlersProps = {
   currentOption: SelectOption | null;
@@ -36,25 +37,31 @@ export const useDirNavigationHandlers = ({
 
   const handleNavigationKeyDown = useCallback(
     (key: KeyEvent) => {
-      if (key.name === "o" && currentOption?.value) {
+
+      if (key.name === "l" && !key.ctrl && !key.meta && currentOption?.value) {
         handleNavigateDir(key, currentOption.value);
+        return;
       }
-      if (key.name === "-" && path) {
+
+      if ((key.name === "-" || key.name === "h") && path) {
         handleNavigateDir(key, path);
+        return;
       }
-      if ((key.name === "c" || key.name === "+") && onCreateDir) {
+      if ((key.name === "a" || key.name === "+") && onCreateDir) {
         onCreateDir();
         return;
       }
-      if ((key.name === "d" || key.name === "delete") && currentOption?.value && onDeleteDir) {
-        // Don't allow deleting the "go back" option
+      if (
+        (key.name === "d" || key.name === "delete") &&
+        currentOption?.value &&
+        onDeleteDir
+      ) {
         if (currentOption.name !== "Press '-' to go back...") {
           onDeleteDir();
           return;
         }
       }
       if (key.name === "r" && currentOption?.value && onRenameDir) {
-        // Don't allow renaming the "go back" option
         if (currentOption.name !== "Press '-' to go back...") {
           onRenameDir();
           return;
@@ -62,7 +69,15 @@ export const useDirNavigationHandlers = ({
       }
       handleSelectKeyDown(key);
     },
-    [currentOption, path, handleNavigateDir, handleSelectKeyDown, onCreateDir, onDeleteDir, onRenameDir],
+    [
+      currentOption,
+      path,
+      handleNavigateDir,
+      handleSelectKeyDown,
+      onCreateDir,
+      onDeleteDir,
+      onRenameDir,
+    ],
   );
 
   return { handleNavigationKeyDown };
