@@ -1,4 +1,5 @@
 import { type KeyEvent } from "@opentui/core";
+import { theme } from "../theme";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import { useCallback, useState, useEffect, useRef } from "react";
 import { ConfigRepository } from "../database";
@@ -131,7 +132,7 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
                 setTemplatesDir(value);
               }}
               style={{ width: "100%" }}
-              backgroundColor="#2A2A40"
+              backgroundColor={theme.inactiveBg}
             />
           </box>
         </box>

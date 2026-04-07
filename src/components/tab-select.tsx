@@ -1,5 +1,6 @@
 import type { TabSelectRenderable } from "@opentui/core";
 import type { TabSelectObject } from "../types";
+import { theme } from "../theme";
 
 type TabSelectProps = {
   tabSelectRef: React.RefObject<TabSelectRenderable | null>;
@@ -25,10 +26,10 @@ export const TabSelect = ({
         flexGrow={1}
         showDescription={false}
         showUnderline={true}
-        backgroundColor="#2A2A3A"
-        textColor="#FFFFFF"
-        selectedBackgroundColor="#5A5A6A"
-        selectedTextColor="#CBA6F7"
+        backgroundColor={theme.inactiveBg}
+        textColor={theme.fg}
+        selectedBackgroundColor={theme.line}
+        selectedTextColor={theme.accent}
       />
     </box>
   );

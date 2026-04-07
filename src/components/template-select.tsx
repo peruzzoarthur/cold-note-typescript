@@ -3,6 +3,7 @@ import {
   type SelectRenderable,
   type KeyEvent,
 } from "@opentui/core";
+import { theme } from "../theme";
 import { useRef, useEffect, useCallback, useState } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
@@ -116,7 +117,7 @@ export const TemplateSelect = ({
           onChange={(_, option) => setTemplatePath(option?.value)}
           onSelect={(_, option) => setTemplatePath(option?.value)}
           onKeyDown={handleSelectKeyDown}
-          selectedTextColor="#CBA6F7"
+          selectedTextColor={theme.accent}
           showScrollIndicator
           options={options}
           style={{ flexGrow: 1 }}

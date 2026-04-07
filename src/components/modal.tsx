@@ -1,5 +1,6 @@
 import { RGBA } from "@opentui/core";
 import { type ReactNode } from "react";
+import { theme } from "../theme";
 
 type ModalProps = {
   children: ReactNode;
@@ -19,8 +20,8 @@ export const Modal = ({
   height = "40%",
   top = "20%",
   left = "15%",
-  borderColor = "#CBA6F7",
-  backgroundColor = "#1E1E2F",
+  borderColor = theme.accent,
+  backgroundColor = theme.bg,
   showBackdrop = true,
   backdropOpacity = 128, // 0-255, default 50%
 }: ModalProps) => {

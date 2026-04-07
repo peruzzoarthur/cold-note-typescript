@@ -1,4 +1,5 @@
 import type { KeyEvent } from "@opentui/core";
+import { theme } from "../../theme";
 import { useGlobalKeyboard } from "../../contexts/GlobalKeyboardContext";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useTabNavigation } from "../../hooks/useTabNavigation";
@@ -108,7 +109,7 @@ export const DirSelect = ({
             setDirPath(option?.value);
           }}
           onKeyDown={handleNavigationKeyDown}
-          selectedTextColor="#CBA6F7"
+          selectedTextColor={theme.accent}
           showScrollIndicator
           options={options}
           style={{ flexGrow: 1 }}

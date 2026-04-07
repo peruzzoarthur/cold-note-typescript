@@ -1,4 +1,5 @@
 import { TextAttributes, type KeyEvent } from "@opentui/core";
+import { theme } from "../../theme";
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
@@ -53,13 +54,13 @@ export const NoteExistsModal = ({ noteName, onOpenExisting, onCancel }: NoteExis
             label="Cancel"
             focused={activeButton === 0}
             width={15}
-            backgroundColor={activeButton === 0 ? "#F38BA8" : "#5A5A6A"}
+            backgroundColor={activeButton === 0 ? theme.error : theme.line}
           />
           <createButton
             label="Open"
             focused={activeButton === 1}
             width={15}
-            backgroundColor={activeButton === 1 ? "#A6E3A2" : "#5A5A6A"}
+            backgroundColor={activeButton === 1 ? theme.success : theme.line}
           />
         </box>
         <text marginTop={1} attributes={TextAttributes.DIM}>

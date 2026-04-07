@@ -16,6 +16,7 @@ import {
 import { AppMenusProvider } from "./contexts/AppMenusContext";
 import { useAppMenus } from "./hooks/useAppMenus";
 import { runMigrations } from "./database";
+import { theme } from "./theme";
 import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
 import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
 import { ModalProvider, useModal } from "./contexts/ModalContext";
@@ -166,7 +167,7 @@ function App() {
 
   return (
     <box
-      backgroundColor="#1E1E2F"
+      backgroundColor={theme.bg}
       flexGrow={1}
       border={true}
       justifyContent="space-between"
@@ -216,7 +217,7 @@ function App() {
         />
       )}
       <box
-        backgroundColor="#1E1E2F"
+        backgroundColor={theme.bg}
         justifyContent="center"
         alignItems="center"
         flexGrow={1}

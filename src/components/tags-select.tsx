@@ -3,6 +3,7 @@ import {
   type SelectOption,
   type SelectRenderable,
 } from "@opentui/core";
+import { theme } from "../theme";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
@@ -263,7 +264,7 @@ export const TagsSelect = ({
             onSelect={handleTagToggle}
             onKeyDown={handleTagsKeyDown}
             showDescription={false}
-            selectedTextColor="#CBA6F7"
+            selectedTextColor={theme.accent}
             showScrollIndicator
             options={displayOptions}
             style={{ flexGrow: 1 }}

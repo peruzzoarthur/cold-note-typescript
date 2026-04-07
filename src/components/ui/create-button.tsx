@@ -6,6 +6,7 @@ import {
   type RenderContext,
 } from "@opentui/core";
 import { extend } from "@opentui/react";
+import { theme } from "../../theme";
 
 class ButtonRenderable extends BoxRenderable {
   private _label: string = "Button";
@@ -27,7 +28,7 @@ class ButtonRenderable extends BoxRenderable {
       ...options,
     });
 
-    this._focusBackgroundColor = options.backgroundColor || "#5A5A6A";
+    this._focusBackgroundColor = options.backgroundColor || theme.line;
 
     if (options.label) {
       this._label = options.label;

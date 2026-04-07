@@ -2,6 +2,7 @@ import type { KeyEvent } from "@opentui/core";
 import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
 import { useCallback } from "react";
 import { Modal } from "./modal";
+import { theme } from "../theme";
 
 type DebugPanelProps = {
   isDebugOpen: boolean;
@@ -25,7 +26,7 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
       height="80%"
       top="10%"
       left="10%"
-      backgroundColor="#2A2A40"
+      backgroundColor={theme.inactiveBg}
     >
       <box flexDirection="column" padding={1}>
         <text marginBottom={1}>
@@ -34,22 +35,22 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
         <scrollbox
           style={{
             rootOptions: {
-              backgroundColor: "#24283b",
+              backgroundColor: theme.scrollRoot,
             },
             wrapperOptions: {
-              backgroundColor: "#1f2335",
+              backgroundColor: theme.scrollWrapper,
             },
             viewportOptions: {
-              backgroundColor: "#1a1b26",
+              backgroundColor: theme.scrollViewport,
             },
             contentOptions: {
-              backgroundColor: "#16161e",
+              backgroundColor: theme.scrollContent,
             },
             scrollbarOptions: {
               showArrows: true,
               trackOptions: {
-                foregroundColor: "#7aa2f7",
-                backgroundColor: "#414868",
+                foregroundColor: theme.scrollbarTrack,
+                backgroundColor: theme.scrollbarBg,
               },
             },
           }}
@@ -63,7 +64,7 @@ export const DebugPanel = ({ isDebugOpen, debugLogs }: DebugPanelProps) => {
                 width: "100%",
                 padding: 1,
                 marginBottom: 1,
-                backgroundColor: index % 2 === 0 ? "#292e42" : "#2f3449"
+                backgroundColor: index % 2 === 0 ? theme.logEven : theme.logOdd,
               }}
             >
               <text content={log} />

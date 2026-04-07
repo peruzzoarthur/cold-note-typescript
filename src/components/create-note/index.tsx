@@ -1,4 +1,5 @@
 import { TextAttributes } from "@opentui/core";
+import { theme } from "../../theme";
 import "../ui/create-button";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useKeyboard } from "@opentui/react";
@@ -159,7 +160,7 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
             label="Create note"
             focused={activeButton === 0}
             width={24}
-            backgroundColor={focused ? "#A6E3A2" : "#5A5A6A"}
+            backgroundColor={focused ? theme.success : theme.line}
           />
         </box>
       </>
