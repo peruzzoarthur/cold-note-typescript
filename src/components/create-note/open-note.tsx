@@ -10,6 +10,29 @@ export const useOpenNote = () => {
   const renderer = useRenderer();
 
   const openNote = async ({ fullPath, dirPath }: OpenNoteParams) => {
+    // Prefer opening in a new tmux window if inside a tmux session
+    if (process.env.TMUX) {
+      try {
+        const child = spawn(
+          "tmux",
+          ["new-window", "-n", fullPath.split("/").pop() ?? "note", "nvim", fullPath],
+          { cwd: dirPath || undefined, detached: true, stdio: "ignore" },
+        );
+
+        await new Promise<void>((resolve, reject) => {
+          child.on("error", reject);
+          child.on("spawn", () => {
+            child.unref();
+            resolve();
+          });
+        });
+
+        return;
+      } catch {
+        // fall through to other methods
+      }
+    }
+
     const terminalCommands = [
       ["kitty", "nvim", fullPath],
       ["konsole", "-e", "nvim", fullPath],
