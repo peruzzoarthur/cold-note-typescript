@@ -30,7 +30,7 @@ export const WideScreenLayout = ({
     flexDirection: "column" as const,
     justifyContent: "flex-start" as const,
     alignItems: "center" as const,
-    width: "100%",
+    width: "100%" as `${number}%`,
     maxWidth: width,
     padding: LAYOUT.SPACING.MEDIUM,
   }), [width]);
@@ -40,7 +40,7 @@ export const WideScreenLayout = ({
     justifyContent: "space-between" as const,
     alignItems: "flex-start" as const,
     gap: LAYOUT.SPACING.MEDIUM,
-    width: "50%",
+    width: "50%" as `${number}%`,
     minHeight: LAYOUT.MIN_HEIGHT.FIRST_ROW,
   }), []);
 
@@ -49,7 +49,7 @@ export const WideScreenLayout = ({
     justifyContent: "center" as const,
     alignItems: "flex-start" as const,
     gap: LAYOUT.SPACING.LARGE,
-    width: "100%",
+    width: "100%" as `${number}%`,
   }), []);
 
   const thirdRowStyle = useMemo(() => ({
@@ -57,7 +57,7 @@ export const WideScreenLayout = ({
     justifyContent: "center" as const,
     alignItems: "flex-start" as const,
     gap: LAYOUT.SPACING.LARGE,
-    width: "100%",
+    width: "100%" as `${number}%`,
   }), []);
 
   const createNoteBoxStyle = useMemo(() => ({
