@@ -1,11 +1,11 @@
 import { type KeyEvent } from "@opentui/core";
 import { theme } from "../theme";
-import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard, useAppMenus } from "../contexts/AppStateContext";
 import { useCallback, useState, useEffect, useRef } from "react";
 import { ConfigRepository } from "../database";
 import type { Config } from "../database/types";
-import { useAppMenus } from "../hooks/useAppMenus";
 import { Modal } from "./modal";
+import { LAYOUT } from "../constants";
 
 type ConfigMenuProps = {
   isMenuOpen: boolean;
@@ -101,13 +101,13 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
   if (!isMenuOpen) return null;
 
   return (
-    <Modal width="50%" height="50%" top="25%" left="25%">
+    <Modal width={LAYOUT.MODAL.CONFIG_WIDTH} height={LAYOUT.MODAL.CONFIG_HEIGHT} top={LAYOUT.MODAL.CONFIG_TOP} left={LAYOUT.MODAL.CONFIG_LEFT}>
       <box alignItems="center" justifyContent="center">
       <ascii-font font="tiny" text="Configuration menu" />
       </box>
-      <box flexDirection="column" padding={2} flexGrow={1}>
-        <text marginBottom={1}>Obsidian Vault Path:</text>
-        <box border={true} height={3} marginBottom={1}>
+      <box flexDirection="column" padding={LAYOUT.SPACING.MEDIUM} flexGrow={1}>
+        <text marginBottom={LAYOUT.SPACING.SMALL}>Obsidian Vault Path:</text>
+        <box border={true} height={LAYOUT.DIMENSIONS.INPUT_HEIGHT} marginBottom={LAYOUT.SPACING.SMALL}>
           <input
             placeholder="Enter path to your Obsidian vault..."
             value={obsidianVault}
@@ -120,8 +120,8 @@ export const ConfigMenu = ({ isMenuOpen, setIsMenuOpen }: ConfigMenuProps) => {
           />
         </box>
         <box flexDirection="column">
-          <text marginBottom={1}>Templates Directory:</text>
-          <box border={true} height={3}>
+          <text marginBottom={LAYOUT.SPACING.SMALL}>Templates Directory:</text>
+          <box border={true} height={LAYOUT.DIMENSIONS.INPUT_HEIGHT}>
             <input
               placeholder="Enter path to your templates directory..."
               value={templatesDir}

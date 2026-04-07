@@ -52,7 +52,9 @@ export class TagRepository {
   }
 
   search(query: string): Tag[] {
-    return this.searchTags.all(`%${query}%`) as Tag[];
+    // Escape SQL wildcard characters to prevent injection
+    const sanitizedQuery = query.replace(/[%_]/g, '\\$&');
+    return this.searchTags.all(`%${sanitizedQuery}%`) as Tag[];
   }
 
   update(id: number, name: string): boolean {

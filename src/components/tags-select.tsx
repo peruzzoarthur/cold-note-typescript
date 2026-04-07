@@ -8,8 +8,9 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
-import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard } from "../contexts/AppStateContext";
 import type { Tag } from "../database";
+import { LAYOUT } from "../constants";
 import "./ui/create-button";
 
 type TagsSelectProps = {
@@ -130,7 +131,7 @@ export const TagsSelect = ({
     }
   };
 
-  const handleInputKeyDown = (key: any) => {
+  const handleInputKeyDown = (key: KeyEvent) => {
     // Check global keys first
     if (handleGlobalKey(key)) {
       return;
@@ -188,7 +189,7 @@ export const TagsSelect = ({
 
   if (!tagRepository) {
     return (
-      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+      <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
         <box style={{ flexDirection: "column", alignItems: "center" }}>
           <text>Loading tags database...</text>
         </box>
@@ -198,9 +199,9 @@ export const TagsSelect = ({
 
   if (isSearchMode) {
     return (
-      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+      <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
         <box style={{ flexDirection: "column", alignItems: "center" }}>
-          <box style={{ border: true, width: 40, height: 3 }}>
+          <box style={{ border: true, width: LAYOUT.DIMENSIONS.INPUT_WIDTH, height: LAYOUT.DIMENSIONS.INPUT_HEIGHT }}>
             <input
               placeholder="Search tags..."
               value={searchInput}
@@ -219,9 +220,9 @@ export const TagsSelect = ({
 
   if (isInputMode) {
     return (
-      <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+      <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
         <box style={{ flexDirection: "column", alignItems: "center" }}>
-          <box style={{ border: true, width: 40, height: 3 }}>
+          <box style={{ border: true, width: LAYOUT.DIMENSIONS.INPUT_WIDTH, height: LAYOUT.DIMENSIONS.INPUT_HEIGHT }}>
             <input
               placeholder="Enter new tag name..."
               value={newTagInput}
@@ -234,12 +235,12 @@ export const TagsSelect = ({
             <createButton
               label="Add Tag"
               focused={activeButton === 0}
-              width={20}
+              width={LAYOUT.DIMENSIONS.BUTTON_WIDTH_SMALL}
             />
             <createButton
               label="Cancel"
               focused={activeButton === 1}
-              width={20}
+              width={LAYOUT.DIMENSIONS.BUTTON_WIDTH_SMALL}
             />
           </box>
           <text>Press Enter to add, Escape to cancel</text>
@@ -249,12 +250,12 @@ export const TagsSelect = ({
   }
 
   return (
-    <box style={{ paddingLeft: 1, paddingRight: 1 }}>
-      <box style={{ flexDirection: "column", width: 60 }}>
+    <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
+      <box style={{ flexDirection: "column", width: LAYOUT.DIMENSIONS.SELECT_WIDTH }}>
         <box
           style={{
-            height: 10,
-            width: 60,
+            height: LAYOUT.DIMENSIONS.SELECT_HEIGHT,
+            width: LAYOUT.DIMENSIONS.SELECT_WIDTH,
             border: true,
           }}
         >

@@ -2,8 +2,9 @@ import { useCallback } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
-import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard } from "../contexts/AppStateContext";
 import type { KeyEvent } from "@opentui/core";
+import { LAYOUT } from "../constants";
 
 type NoteNameInputProps = {
   focused: boolean;
@@ -37,7 +38,7 @@ export const NoteNameInput = ({
   }, [handleGlobalKey, handleKeyDown]);
 
   return (
-    <box style={{ border: true, width: 40, height: 3  }}>
+    <box style={{ border: true, width: LAYOUT.DIMENSIONS.INPUT_WIDTH, height: LAYOUT.DIMENSIONS.INPUT_HEIGHT }}>
       <input
         placeholder="Enter note name..."
         value={noteData.noteName ?? undefined}

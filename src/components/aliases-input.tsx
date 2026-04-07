@@ -2,8 +2,9 @@ import { useCallback } from "react";
 import { useNoteContext } from "../contexts/NoteContext";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
-import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard } from "../contexts/AppStateContext";
 import type { KeyEvent } from "@opentui/core";
+import { LAYOUT } from "../constants";
 
 type AliasesInputProps = {
   focused: boolean;
@@ -41,7 +42,7 @@ export const AliasesInput = ({
     handleKeyDown(key);
   }, [handleGlobalKey, handleKeyDown]);
   return (
-    <box style={{ border: true, width: 40, height: 3 }}>
+    <box style={{ border: true, width: LAYOUT.DIMENSIONS.INPUT_WIDTH, height: LAYOUT.DIMENSIONS.INPUT_HEIGHT }}>
       <input
         placeholder="Enter aliases..."
         value={noteData.aliases ?? undefined}

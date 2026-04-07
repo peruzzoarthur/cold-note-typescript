@@ -1,6 +1,6 @@
 import type { KeyEvent } from "@opentui/core";
 import { theme } from "../../theme";
-import { useGlobalKeyboard } from "../../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard, useModal } from "../../contexts/AppStateContext";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useTabNavigation } from "../../hooks/useTabNavigation";
 import type { TabSelectObject } from "../../types";
@@ -13,7 +13,7 @@ import { useDirNavigationHandlers } from "./hooks/useDirNavigationHandlers";
 import { useCreateDir } from "./hooks/useCreateDir";
 import { useDeleteDir } from "./hooks/useDeleteDir";
 import { useRenameDir } from "./hooks/useRenameDir";
-import { useModal } from "../../contexts/ModalContext";
+import { LAYOUT } from "../../constants";
 
 type DirSelectProps = {
   focused: boolean;
@@ -46,7 +46,7 @@ export const DirSelect = ({
     setCurrentOption,
   } = useDirSelection();
 
-  const { handleNavigateDir } = useNavigateDir(setPath, vaultRoot);
+  const { handleNavigateDir } = useNavigateDir(setPath, vaultRoot || undefined);
 
   useSetVaultPath({ path, setOptions });
 
@@ -56,7 +56,7 @@ export const DirSelect = ({
   });
 
   const { openModal: openCreateDirModal } = useCreateDir({
-    currentPath: path || vaultRoot,
+    currentPath: path || vaultRoot || undefined,
     setOptions,
   });
 
@@ -87,12 +87,12 @@ export const DirSelect = ({
   });
 
   return (
-    <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+    <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
       <box
         style={{
-          height: 10,
-          width: 60,
-          marginBottom: 1,
+          height: LAYOUT.DIMENSIONS.SELECT_HEIGHT,
+          width: LAYOUT.DIMENSIONS.SELECT_WIDTH,
+          marginBottom: LAYOUT.SPACING.SMALL,
           border: true,
         }}
       >

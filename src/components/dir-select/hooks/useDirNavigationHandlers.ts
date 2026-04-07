@@ -1,6 +1,6 @@
 import type { KeyEvent, SelectOption } from "@opentui/core";
 import { useCallback } from "react";
-import { useAppMenus } from "../../../hooks/useAppMenus";
+import { useAppMenus } from "../../../contexts/AppStateContext";
 
 type UseDirNavigationHandlersProps = {
   currentOption: SelectOption | null;

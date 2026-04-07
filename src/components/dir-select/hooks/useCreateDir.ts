@@ -1,11 +1,12 @@
 import { mkdirSync } from "fs";
 import { join } from "path";
 import { useCallback } from "react";
-import { useModal } from "../../../contexts/ModalContext";
+import type { SelectOption } from "@opentui/core";
+import { useModal } from "../../../contexts/AppStateContext";
 
 type UseCreateDirProps = {
   currentPath?: string;
-  setOptions: React.Dispatch<React.SetStateAction<any[]>>;
+  setOptions: React.Dispatch<React.SetStateAction<SelectOption[]>>;
 };
 
 export const useCreateDir = ({ currentPath, setOptions }: UseCreateDirProps) => {

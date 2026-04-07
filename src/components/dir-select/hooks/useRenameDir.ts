@@ -1,7 +1,7 @@
 import { renameSync } from "fs";
 import { join, dirname, basename } from "path";
 import { useCallback } from "react";
-import { useModal } from "../../../contexts/ModalContext";
+import { useModal } from "../../../contexts/AppStateContext";
 
 type UseRenameDirProps = {
   dirPath?: string;

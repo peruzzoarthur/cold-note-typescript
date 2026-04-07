@@ -1,6 +1,6 @@
 import { rmSync } from "fs";
 import { useCallback } from "react";
-import { useModal } from "../../../contexts/ModalContext";
+import { useModal } from "../../../contexts/AppStateContext";
 import { basename } from "path";
 
 type UseDeleteDirProps = {

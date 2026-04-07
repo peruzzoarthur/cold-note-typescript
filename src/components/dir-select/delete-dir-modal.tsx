@@ -3,6 +3,7 @@ import { theme } from "../../theme";
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
+import { LAYOUT } from "../../constants";
 import "../ui/create-button";
 
 type DeleteDirModalProps = {
@@ -38,29 +39,29 @@ export const DeleteDirModal = ({ dirName, onConfirm, onCancel }: DeleteDirModalP
   });
 
   return (
-    <Modal width="50%" height="25%" top="40%" left="25%">
+    <Modal width={LAYOUT.MODAL.DELETE_DIR_WIDTH} height={LAYOUT.MODAL.DELETE_DIR_HEIGHT} top={LAYOUT.MODAL.DELETE_DIR_TOP} left={LAYOUT.MODAL.DELETE_DIR_LEFT}>
       <box flexDirection="column" flexGrow={1}>
-        <text marginBottom={1} attributes={TextAttributes.BOLD}>
+        <text marginBottom={LAYOUT.SPACING.SMALL} attributes={TextAttributes.BOLD}>
           Delete Directory
         </text>
-        <text marginBottom={2}>
+        <text marginBottom={LAYOUT.SPACING.MEDIUM}>
           Are you sure you want to delete "{dirName}"?
         </text>
-        <box flexDirection="row" justifyContent="center" gap={2}>
+        <box flexDirection="row" justifyContent="center" gap={LAYOUT.SPACING.MEDIUM}>
           <createButton
             label="No"
             focused={activeButton === 0}
-            width={15}
+            width={LAYOUT.DIMENSIONS.BUTTON_WIDTH}
             backgroundColor={activeButton === 0 ? theme.error : theme.line}
           />
           <createButton
             label="Yes"
             focused={activeButton === 1}
-            width={15}
+            width={LAYOUT.DIMENSIONS.BUTTON_WIDTH}
             backgroundColor={activeButton === 1 ? theme.success : theme.line}
           />
         </box>
-        <text marginTop={1} attributes={TextAttributes.DIM}>
+        <text marginTop={LAYOUT.SPACING.SMALL} attributes={TextAttributes.DIM}>
           Tab/h/l or ← → to navigate • y/n or Enter to confirm • Esc to cancel
         </text>
       </box>

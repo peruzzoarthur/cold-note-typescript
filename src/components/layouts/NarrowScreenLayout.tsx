@@ -5,6 +5,7 @@ import { TagsSelect } from "../tags-select";
 import { AliasesInput } from "../aliases-input";
 import { CreateNote } from "../create-note";
 import type { LayoutProps } from "./types";
+import { LAYOUT } from "../../constants";
 
 export const NarrowScreenLayout = ({
   isConfigMenuOpen,
@@ -25,8 +26,8 @@ export const NarrowScreenLayout = ({
   return (
     <box
       style={{
-        height: 15,
-        width: 60,
+        height: LAYOUT.DIMENSIONS.NARROW_SCREEN_HEIGHT,
+        width: LAYOUT.DIMENSIONS.NARROW_SCREEN_WIDTH,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",

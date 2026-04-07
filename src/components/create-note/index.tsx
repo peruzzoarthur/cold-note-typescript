@@ -7,9 +7,9 @@ import { useState } from "react";
 import { writeFile, readFile, access } from "fs/promises";
 import { join } from "path";
 import { constants } from "fs";
-import { useAppMenus } from "../../hooks/useAppMenus";
+import { useAppMenus, useModal } from "../../contexts/AppStateContext";
 import { useOpenNote } from "./open-note";
-import { useModal } from "../../contexts/ModalContext";
+import { LAYOUT } from "../../constants";
 
 type CreateNoteProps = {
   isWideScreen?: boolean;
@@ -152,14 +152,14 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            paddingLeft: 1,
-            paddingRight: 1,
+            paddingLeft: LAYOUT.SPACING.SMALL,
+            paddingRight: LAYOUT.SPACING.SMALL,
           }}
         >
           <createButton
             label="Create note"
             focused={activeButton === 0}
-            width={24}
+            width={LAYOUT.DIMENSIONS.CREATE_BUTTON_WIDTH}
             backgroundColor={focused ? theme.success : theme.line}
           />
         </box>
@@ -179,9 +179,9 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
         <box
           style={{
             border: true,
-            width: 60,
-            height: 10,
-            marginTop: 1,
+            width: LAYOUT.DIMENSIONS.CREATE_NOTE_PREVIEW_WIDTH,
+            height: LAYOUT.DIMENSIONS.CREATE_NOTE_PREVIEW_HEIGHT,
+            marginTop: LAYOUT.SPACING.SMALL,
             flexGrow: 1,
           }}
         >
@@ -214,12 +214,12 @@ export const CreateNote = ({ isWideScreen, focused }: CreateNoteProps) => {
           <createButton
             label="Create note"
             focused={activeButton === 0}
-            width={24}
+            width={LAYOUT.DIMENSIONS.CREATE_BUTTON_WIDTH}
           />
           <createButton
             label="Cancel"
             focused={activeButton === 1}
-            width={24}
+            width={LAYOUT.DIMENSIONS.CREATE_BUTTON_WIDTH}
           />
         </box>
       </box>

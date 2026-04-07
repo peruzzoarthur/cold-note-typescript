@@ -6,7 +6,7 @@ import { useState } from "react";
 import { writeFile, readFile } from "fs/promises";
 import { useRenderer } from "@opentui/react";
 import { join } from "path";
-import { useAppMenus } from "../../hooks/useAppMenus";
+import { useAppMenus } from "../../contexts/AppStateContext";
 import { useOpenNote } from "./open-note";
 
 export const CreateNote = () => {

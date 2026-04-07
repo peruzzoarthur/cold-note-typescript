@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTerminalDimensions } from "@opentui/react";
 import { NoteNameInput } from "../note-name-input";
 import { DirSelect } from "../dir-select";
@@ -6,6 +7,7 @@ import { TagsSelect } from "../tags-select";
 import { AliasesInput } from "../aliases-input";
 import { CreateNote } from "../create-note";
 import type { LayoutProps } from "./types";
+import { LAYOUT } from "../../constants";
 
 export const WideScreenLayout = ({
   isConfigMenuOpen,
@@ -24,28 +26,52 @@ export const WideScreenLayout = ({
   const { width } = useTerminalDimensions();
   const canFocus = !isConfigMenuOpen && !isDebugMenuOpen && !isAnyModalOpen;
 
+  const containerStyle = useMemo(() => ({
+    flexDirection: "column" as const,
+    justifyContent: "flex-start" as const,
+    alignItems: "center" as const,
+    width: "100%",
+    maxWidth: width,
+    padding: LAYOUT.SPACING.MEDIUM,
+  }), [width]);
+
+  const firstRowStyle = useMemo(() => ({
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "flex-start" as const,
+    gap: LAYOUT.SPACING.MEDIUM,
+    width: "50%",
+    minHeight: LAYOUT.MIN_HEIGHT.FIRST_ROW,
+  }), []);
+
+  const secondRowStyle = useMemo(() => ({
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    alignItems: "flex-start" as const,
+    gap: LAYOUT.SPACING.LARGE,
+    width: "100%",
+  }), []);
+
+  const thirdRowStyle = useMemo(() => ({
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    alignItems: "flex-start" as const,
+    gap: LAYOUT.SPACING.LARGE,
+    width: "100%",
+  }), []);
+
+  const createNoteBoxStyle = useMemo(() => ({
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    width: LAYOUT.DIMENSIONS.FIRST_ROW_WIDTH,
+    minHeight: LAYOUT.DIMENSIONS.SELECT_HEIGHT,
+  }), []);
+
   return (
-    <box
-      style={{
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "center",
-        width: "100%",
-        maxWidth: width,
-        padding: 2,
-      }}
-    >
+    <box style={containerStyle}>
       {/* First row - Name and Directory */}
-      <box
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 2,
-          width: "50%",
-          minHeight: 5,
-        }}
-      >
+      <box style={firstRowStyle}>
         <NoteNameInput
           focused={canFocus && isNameTabActive()}
           tabOptions={tabOptions}
@@ -61,15 +87,7 @@ export const WideScreenLayout = ({
       </box>
 
       {/* Second row - Template and Tags */}
-      <box
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: 4,
-          width: "100%",
-        }}
-      >
+      <box style={secondRowStyle}>
         <DirSelect
           focused={canFocus && isDirsTabActive()}
           tabOptions={tabOptions}
@@ -85,30 +103,14 @@ export const WideScreenLayout = ({
       </box>
 
       {/* Third row - Aliases */}
-      <box
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: 4,
-          width: "100%",
-        }}
-      >
+      <box style={thirdRowStyle}>
         <TagsSelect
           focused={canFocus && isTagsTabActive()}
           tabOptions={tabOptions}
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
         />
-        <box
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 62,
-            minHeight: 10,
-          }}
-        >
+        <box style={createNoteBoxStyle}>
           <CreateNote
             isWideScreen={true}
             focused={canFocus && isCreateTabActive()}

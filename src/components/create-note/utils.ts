@@ -76,8 +76,8 @@ export const useOpenNote = ({
       process.stdin.setRawMode(originalRawMode);
 
       // Restore original listeners
-      originalListeners.forEach((listener: any) => {
-        process.stdin.on("data", listener);
+      originalListeners.forEach((listener) => {
+        process.stdin.on("data", listener as (data: Buffer) => void);
       });
 
       // Clear screen and show cursor

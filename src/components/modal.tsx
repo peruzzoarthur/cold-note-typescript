@@ -1,6 +1,7 @@
 import { RGBA } from "@opentui/core";
 import { type ReactNode } from "react";
 import { theme } from "../theme";
+import { LAYOUT } from "../constants";
 
 type ModalProps = {
   children: ReactNode;
@@ -36,7 +37,7 @@ export const Modal = ({
             width: "100%",
             height: "100%",
             backgroundColor: RGBA.fromInts(0, 0, 0, backdropOpacity),
-            zIndex: 999,
+            zIndex: LAYOUT.Z_INDEX.BACKDROP,
           }}
         />
       )}
@@ -50,7 +51,7 @@ export const Modal = ({
           border: true,
           borderColor,
           backgroundColor,
-          zIndex: 1000,
+          zIndex: LAYOUT.Z_INDEX.MODAL,
         }}
       >
         {children}

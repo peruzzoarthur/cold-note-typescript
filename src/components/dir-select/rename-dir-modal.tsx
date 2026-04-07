@@ -2,6 +2,7 @@ import { TextAttributes, type KeyEvent } from "@opentui/core";
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
+import { LAYOUT } from "../../constants";
 
 type RenameDirModalProps = {
   oldName: string;
@@ -23,9 +24,9 @@ export const RenameDirModal = ({ oldName, onSubmit, onCancel }: RenameDirModalPr
   });
 
   return (
-    <Modal width="40%" height="20%" top="40%" left="30%">
+    <Modal width={LAYOUT.MODAL.RENAME_DIR_WIDTH} height={LAYOUT.MODAL.RENAME_DIR_HEIGHT} top={LAYOUT.MODAL.RENAME_DIR_TOP} left={LAYOUT.MODAL.RENAME_DIR_LEFT}>
       <box flexDirection="column" flexGrow={1}>
-        <text marginBottom={1} attributes={TextAttributes.BOLD}>
+        <text marginBottom={LAYOUT.SPACING.SMALL} attributes={TextAttributes.BOLD}>
           Rename Directory
         </text>
         <input
@@ -33,7 +34,7 @@ export const RenameDirModal = ({ oldName, onSubmit, onCancel }: RenameDirModalPr
           value={dirName}
           focused={true}
           onInput={setDirName}
-          style={{ marginBottom: 1 }}
+          style={{ marginBottom: LAYOUT.SPACING.SMALL }}
         />
         <text attributes={TextAttributes.DIM}>
           Enter to rename • Esc to cancel

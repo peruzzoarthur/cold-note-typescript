@@ -10,16 +10,17 @@ import { tabOptions } from "./utils";
 import { ConfigMenu } from "./components/config-menu";
 import { DebugPanel } from "./components/debug-panel";
 import {
-  GlobalKeyboardProvider,
+  AppStateProvider,
   useGlobalKeyboard,
-} from "./contexts/GlobalKeyboardContext";
-import { AppMenusProvider } from "./contexts/AppMenusContext";
-import { useAppMenus } from "./hooks/useAppMenus";
+  useAppMenus,
+  useModal,
+} from "./contexts/AppStateContext";
 import { runMigrations } from "./database";
 import { theme } from "./theme";
+import { TUIErrorBoundary } from "./components/ErrorBoundary";
 import { WideScreenLayout } from "./components/layouts/WideScreenLayout";
 import { NarrowScreenLayout } from "./components/layouts/NarrowScreenLayout";
-import { ModalProvider, useModal } from "./contexts/ModalContext";
+import { LAYOUT } from "./constants";
 import { CreateDirModal } from "./components/dir-select/create-dir-modal";
 import { DeleteDirModal } from "./components/dir-select/delete-dir-modal";
 import { RenameDirModal } from "./components/dir-select/rename-dir-modal";
@@ -62,7 +63,7 @@ function App() {
 
   const { width, height } = useTerminalDimensions()
   
-  const isWideScreen = width >= 120;
+  const isWideScreen = width >= LAYOUT.BREAKPOINTS.WIDE;
 
   const isNameTabActive = () => tabOptions[selectedTab]?.name === "Name";
   const isDirsTabActive = () => tabOptions[selectedTab]?.name === "Directory";
@@ -223,7 +224,7 @@ function App() {
         flexGrow={1}
         width="100%"
         maxWidth={width - 2}
-        marginTop={isWideScreen ? 2 : 0}
+        marginTop={isWideScreen ? LAYOUT.SPACING.MEDIUM : 0}
       >
         <Header />
 
@@ -274,13 +275,11 @@ function App() {
 runMigrations();
 
 render(
-  <GlobalKeyboardProvider>
-    <AppMenusProvider>
-      <ModalProvider>
-        <NoteProvider>
-          <App />
-        </NoteProvider>
-      </ModalProvider>
-    </AppMenusProvider>
-  </GlobalKeyboardProvider>,
+  <TUIErrorBoundary>
+    <AppStateProvider>
+      <NoteProvider>
+        <App />
+      </NoteProvider>
+    </AppStateProvider>
+  </TUIErrorBoundary>,
 );

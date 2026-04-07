@@ -3,6 +3,7 @@ import { theme } from "../../theme";
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
+import { LAYOUT } from "../../constants";
 import "../ui/create-button";
 
 type NoteExistsModalProps = {
@@ -38,32 +39,32 @@ export const NoteExistsModal = ({ noteName, onOpenExisting, onCancel }: NoteExis
   });
 
   return (
-    <Modal width="50%" height="30%" top="35%" left="25%">
+    <Modal width={LAYOUT.MODAL.NOTE_EXISTS_WIDTH} height={LAYOUT.MODAL.NOTE_EXISTS_HEIGHT} top={LAYOUT.MODAL.NOTE_EXISTS_TOP} left={LAYOUT.MODAL.NOTE_EXISTS_LEFT}>
       <box flexDirection="column" flexGrow={1}>
-        <text marginBottom={1} attributes={TextAttributes.BOLD}>
+        <text marginBottom={LAYOUT.SPACING.SMALL} attributes={TextAttributes.BOLD}>
           Note Already Exists
         </text>
-        <text marginBottom={2}>
+        <text marginBottom={LAYOUT.SPACING.MEDIUM}>
           A note named "{noteName}" already exists in this directory.
         </text>
-        <text marginBottom={2}>
+        <text marginBottom={LAYOUT.SPACING.MEDIUM}>
           Would you like to open the existing note?
         </text>
-        <box flexDirection="row" justifyContent="center" gap={2}>
+        <box flexDirection="row" justifyContent="center" gap={LAYOUT.SPACING.MEDIUM}>
           <createButton
             label="Cancel"
             focused={activeButton === 0}
-            width={15}
+            width={LAYOUT.DIMENSIONS.BUTTON_WIDTH}
             backgroundColor={activeButton === 0 ? theme.error : theme.line}
           />
           <createButton
             label="Open"
             focused={activeButton === 1}
-            width={15}
+            width={LAYOUT.DIMENSIONS.BUTTON_WIDTH}
             backgroundColor={activeButton === 1 ? theme.success : theme.line}
           />
         </box>
-        <text marginTop={1} attributes={TextAttributes.DIM}>
+        <text marginTop={LAYOUT.SPACING.SMALL} attributes={TextAttributes.DIM}>
           Tab/h/l or ← → to navigate • o/c or Enter to confirm • Esc to cancel
         </text>
       </box>

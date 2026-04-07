@@ -48,8 +48,8 @@ export const NoteProvider = ({ children }: NoteProviderProps) => {
     try {
       runMigrations();
       setTagRepository(new TagRepository());
-    } catch (error) {
-      console.error("Failed to initialize database:", error);
+    } catch (error: unknown) {
+      console.error("Failed to initialize database:", error instanceof Error ? error.message : error);
     }
   }, []);
 

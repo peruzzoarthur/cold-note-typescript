@@ -2,6 +2,7 @@ import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import { ConfigRepository } from "../../../database/repositories/Config";
+import { expandVaultPath } from "../../../utils";
 import type { SelectOption } from "@opentui/core";
 
 type UseSetVaultPathProps = {
@@ -16,10 +17,18 @@ export const useSetVaultPath = ({ path, setOptions }: UseSetVaultPathProps) => {
     try {
       const config = configRepo.find();
       if (config?.obsidian_vault && !path) {
-        const vaultPath = config.obsidian_vault.replace(
-          /^~/,
-          process.env.HOME || "",
-        );
+        const vaultPath = expandVaultPath(config.obsidian_vault);
+        if (!vaultPath) {
+          console.error("Invalid vault path: path traversal detected");
+          setOptions([
+            {
+              name: "Error",
+              value: "",
+              description: "Invalid vault path configuration. Path traversal detected.",
+            },
+          ]);
+          return;
+        }
         try {
           const entries = readdirSync(vaultPath);
           const dirs = entries
@@ -53,10 +62,18 @@ export const useSetVaultPath = ({ path, setOptions }: UseSetVaultPathProps) => {
         }
       } else if (config?.obsidian_vault && !!path) {
         try {
-          const vaultPath = config.obsidian_vault.replace(
-            /^~/,
-            process.env.HOME || "",
-          );
+          const vaultPath = expandVaultPath(config.obsidian_vault);
+          if (!vaultPath) {
+            console.error("Invalid vault path: path traversal detected");
+            setOptions([
+              {
+                name: "Error",
+                value: "",
+                description: "Invalid vault path configuration. Path traversal detected.",
+              },
+            ]);
+            return;
+          }
 
           const entries = readdirSync(path);
           const dirs = entries

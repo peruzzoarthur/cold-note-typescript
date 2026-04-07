@@ -4,14 +4,15 @@ import {
   type KeyEvent,
 } from "@opentui/core";
 import { theme } from "../theme";
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import type { TabSelectObject } from "../types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
 import { useNoteContext } from "../contexts/NoteContext";
-import { useGlobalKeyboard } from "../contexts/GlobalKeyboardContext";
+import { useGlobalKeyboard } from "../contexts/AppStateContext";
 import { ConfigRepository } from "../database";
 import { readdirSync, statSync } from "fs";
 import { join, extname } from "path";
+import { LAYOUT } from "../constants";
 
 type TemplateSelectProps = {
   focused: boolean;
@@ -90,9 +91,11 @@ export const TemplateSelect = ({
     handleKeyDown(key);
   }, [handleGlobalKey, handleKeyDown]);
 
-  const selectedIndex = noteData.templatePath
-    ? options.findIndex((opt) => opt.value === noteData.templatePath)
-    : -1;
+  const selectedIndex = useMemo(() => {
+    return noteData.templatePath
+      ? options.findIndex((opt) => opt.value === noteData.templatePath)
+      : -1;
+  }, [noteData.templatePath, options]);
   const selectRef = useRef<SelectRenderable | null>(null);
 
   useEffect(() => {
@@ -102,12 +105,12 @@ export const TemplateSelect = ({
   }, [selectedIndex]);
 
   return (
-    <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+    <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
       <box
         style={{
-          height: 10,
-          width: 60,
-          marginBottom: 1,
+          height: LAYOUT.DIMENSIONS.SELECT_HEIGHT,
+          width: LAYOUT.DIMENSIONS.SELECT_WIDTH,
+          marginBottom: LAYOUT.SPACING.SMALL,
           border: true,
         }}
       >
