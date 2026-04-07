@@ -8,9 +8,10 @@ import type { SelectOption } from "@opentui/core";
 type UseSetVaultPathProps = {
   path?: string;
   setOptions: React.Dispatch<React.SetStateAction<SelectOption[]>>;
+  setCurrentOption?: (option: SelectOption | null) => void;
 };
 
-export const useSetVaultPath = ({ path, setOptions }: UseSetVaultPathProps) => {
+export const useSetVaultPath = ({ path, setOptions, setCurrentOption }: UseSetVaultPathProps) => {
   const [configRepo] = useState(() => new ConfigRepository());
 
   useEffect(() => {
@@ -50,6 +51,11 @@ export const useSetVaultPath = ({ path, setOptions }: UseSetVaultPathProps) => {
             }));
 
           setOptions(dirs);
+          // Reset current option to first item when loading new directory
+          const firstDir = dirs[0];
+          if (firstDir && setCurrentOption) {
+            setCurrentOption(firstDir);
+          }
         } catch (error) {
           console.error("Failed to read vault directory:", error);
           setOptions([
@@ -106,7 +112,16 @@ export const useSetVaultPath = ({ path, setOptions }: UseSetVaultPathProps) => {
             });
           }
 
-          setOptions([...options, ...dirs]);
+          const allOptions = [...options, ...dirs];
+          setOptions(allOptions);
+          // Reset current option to first actual directory (skip "go back" option)
+          const firstDirOption = dirs[0];
+          if (firstDirOption && setCurrentOption) {
+            setCurrentOption(firstDirOption);
+          } else if (allOptions[0] && setCurrentOption) {
+            // If no directories, select the "go back" option
+            setCurrentOption(allOptions[0]);
+          }
         } catch (error) {
           console.error("Failed to read vault directory:", error);
           setOptions([

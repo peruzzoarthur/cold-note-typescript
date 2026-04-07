@@ -2,14 +2,15 @@ import { rmSync } from "fs";
 import { useCallback } from "react";
 import { useModal } from "../../../contexts/AppStateContext";
 import { basename } from "path";
+import { useDirNavigationStore } from "../store";
 
 type UseDeleteDirProps = {
   dirPath?: string;
-  setOptions: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export const useDeleteDir = ({ dirPath, setOptions }: UseDeleteDirProps) => {
+export const useDeleteDir = ({ dirPath }: UseDeleteDirProps) => {
   const { openDeleteDirModal, setDeleteDirCallback, setDeleteDirName } = useModal();
+  const store = useDirNavigationStore();
 
   const deleteDirectory = useCallback(() => {
     if (!dirPath) {
@@ -19,13 +20,12 @@ export const useDeleteDir = ({ dirPath, setOptions }: UseDeleteDirProps) => {
     try {
       rmSync(dirPath, { recursive: true, force: true });
 
-      setOptions((prevOptions) => {
-        return prevOptions.filter(opt => opt.value !== dirPath);
-      });
+      // Remove from tree
+      store.removeDirectory(dirPath);
     } catch (error) {
       console.error("Failed to delete directory:", error);
     }
-  }, [dirPath, setOptions]);
+  }, [dirPath, store]);
 
   const openModal = useCallback(() => {
     if (dirPath) {

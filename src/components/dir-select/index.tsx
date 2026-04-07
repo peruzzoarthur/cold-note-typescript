@@ -1,19 +1,17 @@
-import type { KeyEvent } from "@opentui/core";
+import type { KeyEvent, SelectOption, SelectRenderable } from "@opentui/core";
+import { useRef, useCallback, useEffect } from "react";
 import { theme } from "../../theme";
 import { useGlobalKeyboard, useModal } from "../../contexts/AppStateContext";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useTabNavigation } from "../../hooks/useTabNavigation";
 import type { TabSelectObject } from "../../types";
-import { useSetVaultPath } from "./hooks/useSetVaultPath";
-import { useNavigateDir } from "./hooks/useNavigateDir";
+import { useDirNavigationStore } from "./store";
 import { useVaultConfig } from "./hooks/useVaultConfig";
-import { useDirSelection } from "./hooks/useDirSelection";
-import { useSelectSync } from "./hooks/useSelectSync";
-import { useDirNavigationHandlers } from "./hooks/useDirNavigationHandlers";
 import { useCreateDir } from "./hooks/useCreateDir";
 import { useDeleteDir } from "./hooks/useDeleteDir";
 import { useRenameDir } from "./hooks/useRenameDir";
 import { LAYOUT } from "../../constants";
+import { getSelectedIndex } from "./utils/tree";
 
 type DirSelectProps = {
   focused: boolean;
@@ -29,62 +27,146 @@ export const DirSelect = ({
   tabOptions,
 }: DirSelectProps) => {
   const { noteData, setDirPath } = useNoteContext();
-  const { handleKeyDown } = useTabNavigation(
-    selectedTab,
-    setSelectedTab,
-    tabOptions,
-  );
+  const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const { handleGlobalKey } = useGlobalKeyboard();
-
   const { vaultRoot } = useVaultConfig();
-  const {
-    options,
-    setOptions,
-    path,
-    setPath,
-    currentOption,
-    setCurrentOption,
-  } = useDirSelection();
+  
+  // Get state and actions from Zustand store
+  const store = useDirNavigationStore();
+  const { currentNode, options } = store;
 
-  const { handleNavigateDir } = useNavigateDir(setPath, vaultRoot || undefined);
+  // Ref for the select component to control cursor position
+  const selectRef = useRef<SelectRenderable | null>(null);
 
-  useSetVaultPath({ path, setOptions });
+  // Initialize vault path when component mounts
+  useEffect(() => {
+    if (vaultRoot && !store.vaultPath) {
+      store.setVaultPath(vaultRoot);
+    }
+  }, [vaultRoot, store.vaultPath, store.setVaultPath]);
 
-  const { selectRef } = useSelectSync({
-    options,
-    selectedPath: noteData.dirPath,
-  });
-
+  // Restore cursor position when navigating to a different directory.
+  // Dep is dirPath only — firing on store.tree would loop: setSelectedIndex
+  // → onChange → selectChild → cloneTree → new tree ref → effect again.
+  useEffect(() => {
+    if (!selectRef.current || !store.tree || !store.currentNode) return;
+    const idx = getSelectedIndex(store.tree, store.currentNode.dirPath);
+    selectRef.current.setSelectedIndex(idx);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.currentNode?.dirPath]);
+  
+  // Create modals
   const { openModal: openCreateDirModal } = useCreateDir({
-    currentPath: path || vaultRoot || undefined,
-    setOptions,
+    currentPath: currentNode?.dirPath || vaultRoot || undefined,
   });
 
   const { openModal: openDeleteDirModal } = useDeleteDir({
-    dirPath: currentOption?.value,
-    setOptions,
+    dirPath: currentNode?.dirPath,
   });
 
   const { openModal: openRenameDirModal } = useRenameDir({
-    dirPath: currentOption?.value,
-    setOptions,
+    dirPath: currentNode?.dirPath,
     selectedDirPath: noteData.dirPath,
     setSelectedDirPath: setDirPath,
   });
 
-  const { isCreateDirModalOpen, isDeleteDirModalOpen, isRenameDirModalOpen } =
-    useModal();
+  const { isCreateDirModalOpen, isDeleteDirModalOpen, isRenameDirModalOpen } = useModal();
 
-  const { handleNavigationKeyDown } = useDirNavigationHandlers({
-    currentOption,
-    path,
-    handleNavigateDir,
-    handleGlobalKey,
-    handleKeyDown,
-    onCreateDir: openCreateDirModal,
-    onDeleteDir: openDeleteDirModal,
-    onRenameDir: openRenameDirModal,
-  });
+  // Handle keyboard navigation
+  const handleNavigationKeyDown = useCallback(
+    (key: KeyEvent) => {
+      // Handle global keys first
+      if (handleGlobalKey(key)) {
+        return;
+      }
+
+      // Navigate to child directory (l or right)
+      if (key.name === "l" && !key.ctrl && !key.meta) {
+        const success = store.navigateToChild();
+        if (success && store.currentNode) {
+          setDirPath(store.currentNode.dirPath);
+        }
+        return;
+      }
+
+      // Navigate to parent directory (h, -, or left)
+      // Only allow if not at vault root
+      if ((key.name === "-" || key.name === "h" || key.name === "left") && currentNode?.parentPath) {
+        const success = store.navigateToParent();
+        if (success && store.currentNode) {
+          setDirPath(store.currentNode.dirPath);
+        }
+        return;
+      }
+
+      // Create directory (a or +)
+      if ((key.name === "a" || key.name === "+") && openCreateDirModal) {
+        openCreateDirModal();
+        return;
+      }
+
+      // Delete directory (d or delete)
+      if ((key.name === "d" || key.name === "delete") && currentNode?.dirPath && openDeleteDirModal) {
+        // Don't delete if it's the "go back" option
+        const isGoBackOption = options.some(
+          opt => opt.name === "Press '-' to go back..." && opt.value === currentNode.dirPath
+        );
+        if (!isGoBackOption) {
+          openDeleteDirModal();
+          return;
+        }
+      }
+
+      // Rename directory (r)
+      if (key.name === "r" && currentNode?.dirPath && openRenameDirModal) {
+        const isGoBackOption = options.some(
+          opt => opt.name === "Press '-' to go back..." && opt.value === currentNode.dirPath
+        );
+        if (!isGoBackOption) {
+          openRenameDirModal();
+          return;
+        }
+      }
+
+      // Tab navigation
+      handleKeyDown(key);
+    },
+    [
+      handleGlobalKey,
+      store,
+      currentNode,
+      options,
+      openCreateDirModal,
+      openDeleteDirModal,
+      openRenameDirModal,
+      handleKeyDown,
+      setDirPath,
+    ]
+  );
+
+  // Handle selection change
+  const handleChange = useCallback(
+    (_index: number, option: SelectOption | null) => {
+      if (!option || !store.tree) return;
+      
+      // Check if this is the "go back" option
+      if (option.name === "Press '-' to go back...") {
+        store.navigateToParent();
+        if (store.currentNode) {
+          setDirPath(store.currentNode.dirPath);
+        }
+        return;
+      }
+      
+      // Find the index of this option in the options list
+      const index = options.findIndex(opt => opt.value === option.value);
+      if (index >= 0) {
+        store.selectChild(index);
+        setDirPath(option.value ?? null);
+      }
+    },
+    [store, options, setDirPath]
+  );
 
   return (
     <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
@@ -104,10 +186,7 @@ export const DirSelect = ({
             !isDeleteDirModalOpen &&
             !isRenameDirModalOpen
           }
-          onChange={(_, option) => {
-            setCurrentOption(option || null);
-            setDirPath(option?.value);
-          }}
+          onChange={handleChange}
           onKeyDown={handleNavigationKeyDown}
           selectedTextColor={theme.accent}
           showScrollIndicator

@@ -1,17 +1,17 @@
-import { renameSync } from "fs";
-import { join, dirname, basename } from "path";
 import { useCallback } from "react";
 import { useModal } from "../../../contexts/AppStateContext";
+import { basename } from "path";
+import { useDirNavigationStore } from "../store";
 
 type UseRenameDirProps = {
   dirPath?: string;
-  setOptions: React.Dispatch<React.SetStateAction<any[]>>;
   selectedDirPath: string | null;
   setSelectedDirPath: (path: string | null) => void;
 };
 
-export const useRenameDir = ({ dirPath, setOptions, selectedDirPath, setSelectedDirPath }: UseRenameDirProps) => {
+export const useRenameDir = ({ dirPath, selectedDirPath, setSelectedDirPath }: UseRenameDirProps) => {
   const { openRenameDirModal, setRenameDirCallback, setRenameDirOldName } = useModal();
+  const store = useDirNavigationStore();
 
   const renameDirectory = useCallback(
     (newName: string) => {
@@ -20,47 +20,20 @@ export const useRenameDir = ({ dirPath, setOptions, selectedDirPath, setSelected
       }
 
       try {
-        const parentDir = dirname(dirPath);
-        const newDirPath = join(parentDir, newName);
-
-        renameSync(dirPath, newDirPath);
-
+        // Rename in tree
+        store.renameDirectory(dirPath, newName);
+        
         // Update the selected path if the renamed directory is currently selected
         if (selectedDirPath === dirPath) {
+          const parentPath = dirPath.substring(0, dirPath.lastIndexOf('/'));
+          const newDirPath = `${parentPath}/${newName}`;
           setSelectedDirPath(newDirPath);
         }
-
-        setOptions((prevOptions) => {
-          // Separate the back button from other options
-          const backButton = prevOptions.find(opt => opt.name === "Press '-' to go back...");
-          const regularOptions = prevOptions.filter(opt => opt.name !== "Press '-' to go back...");
-
-          // Update the renamed directory
-          const updatedOptions = regularOptions.map(opt => {
-            if (opt.value === dirPath) {
-              return {
-                ...opt,
-                name: newName,
-                value: newDirPath,
-                description: `Directory in ${parentDir}`,
-              };
-            }
-            return opt;
-          });
-
-          // Sort alphabetically
-          const sortedOptions = updatedOptions.sort((a, b) =>
-            a.name.localeCompare(b.name),
-          );
-
-          // Put back button first if it exists
-          return backButton ? [backButton, ...sortedOptions] : sortedOptions;
-        });
       } catch (error) {
         console.error("Failed to rename directory:", error);
       }
     },
-    [dirPath, setOptions, selectedDirPath, setSelectedDirPath],
+    [dirPath, selectedDirPath, setSelectedDirPath, store],
   );
 
   const openModal = useCallback(() => {

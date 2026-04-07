@@ -1,16 +1,16 @@
 import { mkdirSync } from "fs";
 import { join } from "path";
 import { useCallback } from "react";
-import type { SelectOption } from "@opentui/core";
 import { useModal } from "../../../contexts/AppStateContext";
+import { useDirNavigationStore } from "../store";
 
 type UseCreateDirProps = {
   currentPath?: string;
-  setOptions: React.Dispatch<React.SetStateAction<SelectOption[]>>;
 };
 
-export const useCreateDir = ({ currentPath, setOptions }: UseCreateDirProps) => {
+export const useCreateDir = ({ currentPath }: UseCreateDirProps) => {
   const { openCreateDirModal, setCreateDirCallback } = useModal();
+  const store = useDirNavigationStore();
 
   const createDirectory = useCallback(
     (dirName: string) => {
@@ -22,27 +22,13 @@ export const useCreateDir = ({ currentPath, setOptions }: UseCreateDirProps) => 
         const newDirPath = join(currentPath, dirName);
         mkdirSync(newDirPath, { recursive: false });
 
-        setOptions((prevOptions) => {
-          const newOption = {
-            name: dirName,
-            value: newDirPath,
-            description: `Directory in ${currentPath}`,
-          };
-
-          const backButton = prevOptions.find(opt => opt.name === "Press '-' to go back...");
-          const regularOptions = prevOptions.filter(opt => opt.name !== "Press '-' to go back...");
-
-          const sortedOptions = [...regularOptions, newOption].sort((a, b) =>
-            a.name.localeCompare(b.name),
-          );
-
-          return backButton ? [backButton, ...sortedOptions] : sortedOptions;
-        });
+        // Add to tree and refresh
+        store.addDirectory(currentPath, dirName);
       } catch (error) {
         console.error("Failed to create directory:", error);
       }
     },
-    [currentPath, setOptions],
+    [currentPath, store],
   );
 
   const openModal = useCallback(() => {
