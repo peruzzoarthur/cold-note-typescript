@@ -356,14 +356,12 @@ export function selectChildNode(tree: NavigationTree, index: number): boolean {
   const current = tree.nodes.get(tree.currentPath);
   if (!current) return false;
   
-  // Adjust for "go back" option
-  const adjustedIndex = current.parentPath ? index - 1 : index;
+  // Index is the direct index into childrenPaths (no "go back" option adjustment needed)
+  if (index < 0 || index >= current.childrenPaths.length) return false;
   
-  if (adjustedIndex < 0 || adjustedIndex >= current.childrenPaths.length) return false;
-  
-  const nextPath = current.childrenPaths[adjustedIndex];
+  const nextPath = current.childrenPaths[index];
   updateNode(tree, tree.currentPath, {
-    selectedChildIndex: adjustedIndex,
+    selectedChildIndex: index,
     nextPath: nextPath ?? null,
   });
   
@@ -376,14 +374,14 @@ export function nodesToOptions(tree: NavigationTree, currentPath: string): Selec
   
   const options: SelectOption[] = [];
   
-  // Add "go back" option if not at vault root
-  if (current.parentPath) {
-    options.push({
-      name: "Press '-' to go back...",
-      value: current.parentPath,
-      description: "Parent directory",
-    });
-  }
+  // // Add "go back" option if not at vault root
+  // if (current.parentPath) {
+  //   options.push({
+  //     name: "Press '-' to go back...",
+  //     value: current.parentPath,
+  //     description: "Parent directory",
+  //   });
+  // }
   
   // Add children
   for (const childPath of current.childrenPaths) {
@@ -411,6 +409,6 @@ export function getSelectedIndex(tree: NavigationTree, currentPath: string): num
   const current = tree.nodes.get(currentPath);
   if (!current) return 0;
   
-  // Account for "go back" option at index 0
-  return current.parentPath ? current.selectedChildIndex + 1 : current.selectedChildIndex;
+  // selectedChildIndex is the direct index (no "go back" option)
+  return current.selectedChildIndex;
 }

@@ -37,6 +37,9 @@ export const DirSelect = ({
 
   // Ref for the select component to control cursor position
   const selectRef = useRef<SelectRenderable | null>(null);
+  
+  // Track whether we're restoring cursor from effect (to prevent onChange overwriting nextPath)
+  const isRestoringCursor = useRef(false);
 
   // Initialize vault path synchronously during render (same pattern as original).
   // useEffect causes a delayed init that leaves store.tree = null on first render,
@@ -53,7 +56,12 @@ export const DirSelect = ({
   useEffect(() => {
     if (!selectRef.current || !store.tree || !store.currentNode) return;
     const idx = getSelectedIndex(store.tree, store.currentNode.dirPath);
+    isRestoringCursor.current = true;
     selectRef.current.setSelectedIndex(idx);
+    // Reset flag after a tick to allow onChange to fire but skip the update
+    setTimeout(() => { 
+      isRestoringCursor.current = false;
+    }, 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentNode?.dirPath]);
   
@@ -150,6 +158,8 @@ export const DirSelect = ({
   // go-back navigation is handled exclusively by the h/- key handler.
   const handleChange = useCallback(
     (_index: number, option: SelectOption | null) => {
+      // Skip if we're restoring cursor from effect (to prevent overwriting nextPath)
+      if (isRestoringCursor.current) return;
       if (!option || !store.tree || option.name === "Press '-' to go back...") return;
       const index = options.findIndex(opt => opt.value === option.value);
       if (index >= 0) {

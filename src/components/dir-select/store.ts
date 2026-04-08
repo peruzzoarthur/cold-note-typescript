@@ -11,6 +11,7 @@ import {
   removeNodeFromTree,
   renameNodeInTree,
 } from "./utils/tree";
+import { debugLog } from "../../utils/debug";
 
 interface DirNavigationState {
   // State
@@ -99,10 +100,8 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     const { tree, currentNode } = get();
     if (!tree || !currentNode) return;
     
-    // Adjust index to account for "go back" option
-    const adjustedIndex = currentNode.parentPath ? index - 1 : index;
-    
-    if (selectChildNode(tree, adjustedIndex)) {
+    // Index is the direct index into children (no adjustment needed)
+    if (selectChildNode(tree, index)) {
       // Clone tree to trigger update
       const newTree = cloneTree(tree);
       set({ tree: newTree });
