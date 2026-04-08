@@ -11,7 +11,6 @@ import {
   removeNodeFromTree,
   renameNodeInTree,
 } from "./utils/tree";
-import { debugLog } from "../../utils/debug";
 
 interface DirNavigationState {
   // State
