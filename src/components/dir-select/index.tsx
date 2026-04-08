@@ -38,12 +38,14 @@ export const DirSelect = ({
   // Ref for the select component to control cursor position
   const selectRef = useRef<SelectRenderable | null>(null);
 
-  // Initialize vault path when component mounts
-  useEffect(() => {
-    if (vaultRoot && !store.vaultPath) {
-      store.setVaultPath(vaultRoot);
-    }
-  }, [vaultRoot, store.vaultPath, store.setVaultPath]);
+  // Initialize vault path synchronously during render (same pattern as original).
+  // useEffect causes a delayed init that leaves store.tree = null on first render,
+  // making navigateToChild() return false silently until the effect fires.
+  const initialized = useRef(false);
+  if (!initialized.current && vaultRoot) {
+    store.setVaultPath(vaultRoot);
+    initialized.current = true;
+  }
 
   // Restore cursor position when navigating to a different directory.
   // Dep is dirPath only — firing on store.tree would loop: setSelectedIndex
@@ -144,21 +146,11 @@ export const DirSelect = ({
     ]
   );
 
-  // Handle selection change
+  // Handle selection change — only tracks which child is highlighted.
+  // go-back navigation is handled exclusively by the h/- key handler.
   const handleChange = useCallback(
     (_index: number, option: SelectOption | null) => {
-      if (!option || !store.tree) return;
-      
-      // Check if this is the "go back" option
-      if (option.name === "Press '-' to go back...") {
-        store.navigateToParent();
-        if (store.currentNode) {
-          setDirPath(store.currentNode.dirPath);
-        }
-        return;
-      }
-      
-      // Find the index of this option in the options list
+      if (!option || !store.tree || option.name === "Press '-' to go back...") return;
       const index = options.findIndex(opt => opt.value === option.value);
       if (index >= 0) {
         store.selectChild(index);

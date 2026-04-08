@@ -29,53 +29,75 @@ function getDirectoryChildren(dirPath: string): string[] {
 export function buildDirectoryTree(vaultPath: string): NavigationTree {
   const nodes = new Map<string, DirectoryNode>();
   
+  // Normalize vault path - remove trailing slash for consistency
+  const normalizedVaultPath = vaultPath.endsWith('/') && vaultPath !== '/' 
+    ? vaultPath.slice(0, -1) 
+    : vaultPath;
+  
   // Only load the root node initially, children are loaded on demand
-  const rootChildren = getDirectoryChildren(vaultPath);
+  const rootChildren = getDirectoryChildren(normalizedVaultPath);
   
   const rootNode: DirectoryNode = {
-    dirName: basename(vaultPath),
-    dirPath: vaultPath,
+    dirName: basename(normalizedVaultPath),
+    dirPath: normalizedVaultPath,
     parentPath: null,
     childrenPaths: rootChildren,
     nextPath: rootChildren[0] || null,
     selectedChildIndex: 0,
   };
   
-  nodes.set(vaultPath, rootNode);
+  nodes.set(normalizedVaultPath, rootNode);
   
   return {
     nodes,
-    vaultPath,
-    currentPath: vaultPath,
+    vaultPath: normalizedVaultPath,
+    currentPath: normalizedVaultPath,
   };
 }
 
 // Lazy load a directory's children when first accessed
 function ensureNodeLoaded(tree: NavigationTree, dirPath: string): DirectoryNode | null {
-  let node = tree.nodes.get(dirPath);
+  // Normalize the path
+  const normalizedPath = dirPath.endsWith('/') && dirPath !== '/' 
+    ? dirPath.slice(0, -1) 
+    : dirPath;
+    
+  let node = tree.nodes.get(normalizedPath);
   
   if (!node) {
     // Node doesn't exist, need to load it
-    const parentPath = dirPath.substring(0, dirPath.lastIndexOf('/'));
+    // Calculate parent path
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    if (lastSlashIndex <= 0) {
+      // Root directory or invalid path
+      return null;
+    }
+    
+    const parentPath = normalizedPath.substring(0, lastSlashIndex);
     const parent = tree.nodes.get(parentPath);
     
-    if (!parent || !parent.childrenPaths.includes(dirPath)) {
-      // Path not in tree
+    if (!parent) {
+      console.error("[ensureNodeLoaded] Parent not found:", parentPath, "for child:", normalizedPath);
+      return null;
+    }
+    
+    if (!parent.childrenPaths.includes(normalizedPath)) {
+      console.error("[ensureNodeLoaded] Path not in parent's children. Parent:", parentPath, "Children:", parent.childrenPaths, "Looking for:", normalizedPath);
       return null;
     }
     
     // Create the node
-    const children = getDirectoryChildren(dirPath);
+    const children = getDirectoryChildren(normalizedPath);
     node = {
-      dirName: basename(dirPath),
-      dirPath,
+      dirName: basename(normalizedPath),
+      dirPath: normalizedPath,
       parentPath,
       childrenPaths: children,
       nextPath: children[0] || null,
       selectedChildIndex: 0,
     };
     
-    tree.nodes.set(dirPath, node);
+    tree.nodes.set(normalizedPath, node);
   }
   
   return node;
@@ -279,7 +301,9 @@ export function navigateToChildNode(
   childName?: string
 ): DirectoryNode | null {
   const current = tree.nodes.get(tree.currentPath);
-  if (!current) return null;
+  if (!current) {
+    return null;
+  }
   
   let targetPath: string | null = null;
   
@@ -294,14 +318,18 @@ export function navigateToChildNode(
     targetPath = current.childrenPaths[0] || null;
   }
   
-  if (!targetPath) return null;
+  if (!targetPath) {
+    return null;
+  }
   
   // Lazy load the child node if not already loaded
   const childNode = ensureNodeLoaded(tree, targetPath);
-  if (!childNode) return null;
+  if (!childNode) {
+    return null;
+  }
   
-  // Update tree current path
-  tree.currentPath = targetPath;
+  // Update tree current path (use normalized path)
+  tree.currentPath = childNode.dirPath;
   
   return childNode;
 }
