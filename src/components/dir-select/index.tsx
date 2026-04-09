@@ -86,7 +86,7 @@ export const DirSelect = ({
     addDebugLog(`[DirSelect] highlightedChildPath: ${highlightedChildPath || 'undefined'}`);
   }, [highlightedChildPath, addDebugLog]);
 
-  // Create modals
+  // Create modals - hooks now set up callbacks via useEffect
   const { openModal: openCreateDirModal } = useCreateDir({
     currentPath: currentNode?.dirPath || vaultRoot || undefined,
   });

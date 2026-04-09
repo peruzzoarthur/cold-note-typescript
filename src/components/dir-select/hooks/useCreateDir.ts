@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useModal, useAppMenus } from "../../../contexts/AppStateContext";
 import { useDirNavigationStore } from "../store";
 
@@ -10,41 +10,35 @@ export const useCreateDir = ({ currentPath }: UseCreateDirProps) => {
   const { openCreateDirModal, setCreateDirCallback } = useModal();
   const store = useDirNavigationStore();
   const { addDebugLog } = useAppMenus();
-  
-  // Use ref to always have latest currentPath without recreating callbacks
-  const currentPathRef = useRef(currentPath);
-  useEffect(() => {
-    currentPathRef.current = currentPath;
-    addDebugLog(`[useCreateDir] currentPath updated: ${currentPath}`);
-  }, [currentPath, addDebugLog]);
 
-  const createDirectory = useCallback(
-    (dirName: string) => {
-      const latestPath = currentPathRef.current;
-      addDebugLog(`[useCreateDir] createDirectory called - currentPathRef: ${latestPath}, dirName: ${dirName}`);
-      if (!latestPath || !dirName.trim()) {
-        addDebugLog(`[useCreateDir] ABORT - currentPathRef: ${latestPath}, dirName.trim(): "${dirName.trim()}"`);
+  // Update the callback whenever currentPath changes - this ensures the callback always has current path
+  useEffect(() => {
+    addDebugLog(`[useCreateDir] Setting up callback for currentPath: ${currentPath}`);
+    
+    const callback = (dirName: string) => {
+      addDebugLog(`[useCreateDir] createDirectory EXECUTING - currentPath at execution: ${currentPath}, dirName: ${dirName}`);
+      if (!currentPath || !dirName.trim()) {
+        addDebugLog(`[useCreateDir] ABORT - currentPath: ${currentPath}, dirName.trim(): "${dirName.trim()}"`);
         return;
       }
 
       try {
-        // store.addDirectory handles the filesystem mkdirSync via addNodeToTree
-        addDebugLog(`[useCreateDir] Calling store.addDirectory(${latestPath}, ${dirName})`);
-        store.addDirectory(latestPath, dirName);
+        addDebugLog(`[useCreateDir] Calling store.addDirectory(${currentPath}, ${dirName})`);
+        store.addDirectory(currentPath, dirName);
         addDebugLog(`[useCreateDir] store.addDirectory completed`);
       } catch (error) {
         addDebugLog(`[useCreateDir] ERROR: ${error}`);
         console.error("Failed to create directory:", error);
       }
-    },
-    [store, addDebugLog],
-  );
+    };
+    
+    setCreateDirCallback(callback);
+  }, [currentPath, store, setCreateDirCallback, addDebugLog]);
 
   const openModal = useCallback(() => {
-    addDebugLog(`[useCreateDir] openModal called - currentPathRef: ${currentPathRef.current}`);
-    setCreateDirCallback(createDirectory);
+    addDebugLog(`[useCreateDir] openModal called - currentPath: ${currentPath}`);
     openCreateDirModal();
-  }, [createDirectory, setCreateDirCallback, openCreateDirModal, addDebugLog]);
+  }, [openCreateDirModal, currentPath, addDebugLog]);
 
   return {
     openModal,
