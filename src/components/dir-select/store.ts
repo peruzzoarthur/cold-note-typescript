@@ -13,13 +13,11 @@ import {
 } from "./utils/tree";
 
 interface DirNavigationState {
-  // State
   tree: NavigationTree | null;
   currentNode: DirectoryNode | null;
   options: SelectOption[];
   vaultPath: string | null;
   
-  // Actions
   setVaultPath: (vaultPath: string | null) => void;
   navigateToChild: (childName?: string) => boolean;
   navigateToParent: () => boolean;
@@ -30,7 +28,6 @@ interface DirNavigationState {
   renameDirectory: (oldPath: string, newName: string) => void;
 }
 
-// Helper to create a new tree reference with cloned nodes Map
 function cloneTree(tree: NavigationTree): NavigationTree {
   return {
     vaultPath: tree.vaultPath,
@@ -40,13 +37,11 @@ function cloneTree(tree: NavigationTree): NavigationTree {
 }
 
 export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
-  // Initial state
   tree: null,
   currentNode: null,
   options: [],
   vaultPath: null,
   
-  // Set vault path and build tree
   setVaultPath: (vaultPath: string | null) => {
     if (!vaultPath) {
       set({ tree: null, currentNode: null, options: [], vaultPath: null });
@@ -60,7 +55,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     set({ tree, currentNode, options, vaultPath });
   },
   
-  // Navigate to child directory
   navigateToChild: (childName?: string): boolean => {
     const { tree } = get();
     if (!tree) return false;
@@ -68,7 +62,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     const childNode = navigateToChildNode(tree, childName);
     if (!childNode) return false;
     
-    // Clone tree to trigger update
     const newTree = cloneTree(tree);
     const options = nodesToOptions(newTree, childNode.dirPath);
     
@@ -77,7 +70,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     return true;
   },
   
-  // Navigate to parent directory
   navigateToParent: (): boolean => {
     const { tree } = get();
     if (!tree) return false;
@@ -85,7 +77,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     const parentNode = navigateToParentNode(tree);
     if (!parentNode) return false;
     
-    // Clone tree to trigger update
     const newTree = cloneTree(tree);
     const options = nodesToOptions(newTree, parentNode.dirPath);
     
@@ -94,7 +85,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     return true;
   },
   
-  // Select a child (updates selected index but doesn't navigate)
   selectChild: (index: number): void => {
     console.log(`[store.selectChild] Called with index: ${index}`);
     const { tree, currentNode } = get();
@@ -105,10 +95,8 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     
     console.log(`[store.selectChild] currentNode.dirPath: ${currentNode.dirPath}, childrenPaths.length: ${currentNode.childrenPaths.length}, current selectedChildIndex: ${currentNode.selectedChildIndex}`);
     
-    // Index is the direct index into children (no adjustment needed)
     if (selectChildNode(tree, index)) {
       console.log(`[store.selectChild] selectChildNode succeeded, cloning tree`);
-      // Clone tree to trigger update
       const newTree = cloneTree(tree);
       set({ tree: newTree });
       console.log(`[store.selectChild] Tree updated`);
@@ -117,7 +105,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     }
   },
   
-  // Refresh tree from filesystem
   refreshTree: (): void => {
     const { vaultPath, tree: oldTree } = get();
     if (!vaultPath) return;
@@ -125,7 +112,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     const currentPath = oldTree?.currentPath;
     const tree = buildDirectoryTree(vaultPath);
     
-    // Try to restore current path
     if (currentPath && tree.nodes.has(currentPath)) {
       tree.currentPath = currentPath;
     }
@@ -136,7 +122,6 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     set({ tree, currentNode, options });
   },
   
-  // Add new directory
   addDirectory: (parentPath: string, dirName: string): void => {
     console.log(`[store.addDirectory] Called with parentPath: ${parentPath}, dirName: ${dirName}`);
     const { tree, currentNode } = get();
