@@ -1,7 +1,7 @@
 import type { KeyEvent, SelectOption, SelectRenderable } from "@opentui/core";
 import { useRef, useCallback, useEffect } from "react";
 import { theme } from "../../theme";
-import { useGlobalKeyboard, useModal } from "../../contexts/AppStateContext";
+import { useGlobalKeyboard, useModal, useAppMenus } from "../../contexts/AppStateContext";
 import { useNoteContext } from "../../contexts/NoteContext";
 import { useTabNavigation } from "../../hooks/useTabNavigation";
 import type { TabSelectObject } from "../../types";
@@ -30,10 +30,16 @@ export const DirSelect = ({
   const { handleKeyDown } = useTabNavigation(selectedTab, setSelectedTab, tabOptions);
   const { handleGlobalKey } = useGlobalKeyboard();
   const { vaultRoot } = useVaultConfig();
+  const { addDebugLog } = useAppMenus();
   
   // Get state and actions from Zustand store
   const store = useDirNavigationStore();
   const { currentNode, options } = store;
+
+  // DEBUG: Log component render state
+  useEffect(() => {
+    addDebugLog(`[DirSelect] Render - currentNode: ${currentNode?.dirPath || 'null'}, selectedChildIdx: ${currentNode?.selectedChildIndex}, children: ${currentNode?.childrenPaths.length}`);
+  }, [currentNode?.dirPath, currentNode?.selectedChildIndex, currentNode?.childrenPaths.length, addDebugLog]);
 
   // Ref for the select component to control cursor position
   const selectRef = useRef<SelectRenderable | null>(null);
@@ -65,17 +71,32 @@ export const DirSelect = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentNode?.dirPath]);
   
+  // Compute the path of the highlighted (selected) child — this is what d/r should act on.
+  // Create should still act on the current directory (the parent).
+  const highlightedChildPath =
+    currentNode &&
+    currentNode.childrenPaths.length > 0 &&
+    currentNode.selectedChildIndex >= 0 &&
+    currentNode.selectedChildIndex < currentNode.childrenPaths.length
+      ? currentNode.childrenPaths[currentNode.selectedChildIndex]
+      : undefined;
+
+  // DEBUG: Log highlighted child path
+  useEffect(() => {
+    addDebugLog(`[DirSelect] highlightedChildPath: ${highlightedChildPath || 'undefined'}`);
+  }, [highlightedChildPath, addDebugLog]);
+
   // Create modals
   const { openModal: openCreateDirModal } = useCreateDir({
     currentPath: currentNode?.dirPath || vaultRoot || undefined,
   });
 
   const { openModal: openDeleteDirModal } = useDeleteDir({
-    dirPath: currentNode?.dirPath,
+    dirPath: highlightedChildPath,
   });
 
   const { openModal: openRenameDirModal } = useRenameDir({
-    dirPath: currentNode?.dirPath,
+    dirPath: highlightedChildPath,
     selectedDirPath: noteData.dirPath,
     setSelectedDirPath: setDirPath,
   });
@@ -111,31 +132,23 @@ export const DirSelect = ({
 
       // Create directory (a or +)
       if ((key.name === "a" || key.name === "+") && openCreateDirModal) {
+        addDebugLog(`[DirSelect] Opening create dir modal - currentPath: ${currentNode?.dirPath || vaultRoot || 'undefined'}`);
         openCreateDirModal();
         return;
       }
 
-      // Delete directory (d or delete)
-      if ((key.name === "d" || key.name === "delete") && currentNode?.dirPath && openDeleteDirModal) {
-        // Don't delete if it's the "go back" option
-        const isGoBackOption = options.some(
-          opt => opt.name === "Press '-' to go back..." && opt.value === currentNode.dirPath
-        );
-        if (!isGoBackOption) {
-          openDeleteDirModal();
-          return;
-        }
+      // Delete highlighted child directory (d or delete)
+      if ((key.name === "d" || key.name === "delete") && highlightedChildPath && openDeleteDirModal) {
+        addDebugLog(`[DirSelect] Opening delete dir modal - dirPath: ${highlightedChildPath}`);
+        openDeleteDirModal();
+        return;
       }
 
-      // Rename directory (r)
-      if (key.name === "r" && currentNode?.dirPath && openRenameDirModal) {
-        const isGoBackOption = options.some(
-          opt => opt.name === "Press '-' to go back..." && opt.value === currentNode.dirPath
-        );
-        if (!isGoBackOption) {
-          openRenameDirModal();
-          return;
-        }
+      // Rename highlighted child directory (r)
+      if (key.name === "r" && highlightedChildPath && openRenameDirModal) {
+        addDebugLog(`[DirSelect] Opening rename dir modal - dirPath: ${highlightedChildPath}`);
+        openRenameDirModal();
+        return;
       }
 
       // Tab navigation
@@ -145,7 +158,7 @@ export const DirSelect = ({
       handleGlobalKey,
       store,
       currentNode,
-      options,
+      highlightedChildPath,
       openCreateDirModal,
       openDeleteDirModal,
       openRenameDirModal,
@@ -158,16 +171,25 @@ export const DirSelect = ({
   // go-back navigation is handled exclusively by the h/- key handler.
   const handleChange = useCallback(
     (_index: number, option: SelectOption | null) => {
+      addDebugLog(`[DirSelect] handleChange called - _index: ${_index}, option.value: ${option?.value}, option.name: ${option?.name}`);
       // Skip if we're restoring cursor from effect (to prevent overwriting nextPath)
-      if (isRestoringCursor.current) return;
-      if (!option || !store.tree || option.name === "Press '-' to go back...") return;
+      if (isRestoringCursor.current) {
+        addDebugLog(`[DirSelect] handleChange SKIPPED - isRestoringCursor is true`);
+        return;
+      }
+      if (!option || !store.tree || option.name === "Press '-' to go back...") {
+        addDebugLog(`[DirSelect] handleChange SKIPPED - !option: ${!option}, !store.tree: ${!store.tree}`);
+        return;
+      }
       const index = options.findIndex(opt => opt.value === option.value);
+      addDebugLog(`[DirSelect] handleChange - found index in options: ${index}, calling store.selectChild(${index})`);
       if (index >= 0) {
         store.selectChild(index);
         setDirPath(option.value ?? null);
+        addDebugLog(`[DirSelect] handleChange completed - setDirPath to: ${option.value}`);
       }
     },
-    [store, options, setDirPath]
+    [store, options, setDirPath, addDebugLog]
   );
 
   return (

@@ -1,8 +1,9 @@
 import { TextAttributes, type KeyEvent } from "@opentui/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
 import { LAYOUT } from "../../constants";
+import { useAppMenus } from "../../contexts/AppStateContext";
 
 type RenameDirModalProps = {
   oldName: string;
@@ -12,13 +13,29 @@ type RenameDirModalProps = {
 
 export const RenameDirModal = ({ oldName, onSubmit, onCancel }: RenameDirModalProps) => {
   const [dirName, setDirName] = useState(oldName);
+  const { addDebugLog } = useAppMenus();
+
+  // DEBUG: Log when modal mounts and when oldName changes
+  useEffect(() => {
+    addDebugLog(`[RenameDirModal] Mounted/oldName changed - oldName: "${oldName}", dirName state: "${dirName}"`);
+  }, [oldName, addDebugLog]);
+
+  // DEBUG: Log when dirName state changes
+  useEffect(() => {
+    addDebugLog(`[RenameDirModal] dirName state changed to: "${dirName}"`);
+  }, [dirName, addDebugLog]);
 
   useKeyboard((key: KeyEvent) => {
+    addDebugLog(`[RenameDirModal] Key pressed: ${key.name}, dirName: "${dirName}", oldName: "${oldName}"`);
     if (key.name === "return" || key.name === "enter") {
       if (dirName.trim() && dirName !== oldName) {
+        addDebugLog(`[RenameDirModal] Submitting newName: "${dirName.trim()}"`);
         onSubmit(dirName.trim());
+      } else {
+        addDebugLog(`[RenameDirModal] Submit blocked - dirName.trim(): "${dirName.trim()}", dirName !== oldName: ${dirName !== oldName}`);
       }
     } else if (key.name === "escape") {
+      addDebugLog(`[RenameDirModal] Cancel pressed`);
       onCancel();
     }
   });

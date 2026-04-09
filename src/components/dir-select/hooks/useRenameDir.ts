@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import { useModal } from "../../../contexts/AppStateContext";
-import { basename } from "path";
+import { useCallback, useRef, useEffect } from "react";
+import { useModal, useAppMenus } from "../../../contexts/AppStateContext";
+import { basename, join } from "path";
 import { useDirNavigationStore } from "../store";
 
 type UseRenameDirProps = {
@@ -12,37 +12,66 @@ type UseRenameDirProps = {
 export const useRenameDir = ({ dirPath, selectedDirPath, setSelectedDirPath }: UseRenameDirProps) => {
   const { openRenameDirModal, setRenameDirCallback, setRenameDirOldName } = useModal();
   const store = useDirNavigationStore();
+  const { addDebugLog } = useAppMenus();
+  
+  // Use refs to always have latest values without recreating callbacks
+  const dirPathRef = useRef(dirPath);
+  const selectedDirPathRef = useRef(selectedDirPath);
+  
+  useEffect(() => {
+    dirPathRef.current = dirPath;
+    addDebugLog(`[useRenameDir] dirPath updated: ${dirPath}`);
+  }, [dirPath, addDebugLog]);
+  
+  useEffect(() => {
+    selectedDirPathRef.current = selectedDirPath;
+    addDebugLog(`[useRenameDir] selectedDirPath updated: ${selectedDirPath}`);
+  }, [selectedDirPath, addDebugLog]);
 
   const renameDirectory = useCallback(
     (newName: string) => {
-      if (!dirPath || !newName.trim()) {
+      const latestDirPath = dirPathRef.current;
+      const latestSelectedDirPath = selectedDirPathRef.current;
+      addDebugLog(`[useRenameDir] renameDirectory called - dirPathRef: ${latestDirPath}, newName: ${newName}`);
+      if (!latestDirPath || !newName.trim()) {
+        addDebugLog(`[useRenameDir] ABORT - dirPathRef: ${latestDirPath}, newName.trim(): "${newName.trim()}"`);
         return;
       }
 
       try {
         // Rename in tree
-        store.renameDirectory(dirPath, newName);
+        addDebugLog(`[useRenameDir] Calling store.renameDirectory(${latestDirPath}, ${newName})`);
+        store.renameDirectory(latestDirPath, newName);
+        addDebugLog(`[useRenameDir] store.renameDirectory completed`);
         
         // Update the selected path if the renamed directory is currently selected
-        if (selectedDirPath === dirPath) {
-          const parentPath = dirPath.substring(0, dirPath.lastIndexOf('/'));
-          const newDirPath = `${parentPath}/${newName}`;
+        if (latestSelectedDirPath === latestDirPath) {
+          const parentPath = latestDirPath.substring(0, latestDirPath.lastIndexOf('/')) || '/';
+          const newDirPath = join(parentPath, newName);
+          addDebugLog(`[useRenameDir] Updating selectedDirPath from ${latestSelectedDirPath} to ${newDirPath}`);
           setSelectedDirPath(newDirPath);
         }
       } catch (error) {
+        addDebugLog(`[useRenameDir] ERROR: ${error}`);
         console.error("Failed to rename directory:", error);
       }
     },
-    [dirPath, selectedDirPath, setSelectedDirPath, store],
+    [store, setSelectedDirPath, addDebugLog],
   );
 
   const openModal = useCallback(() => {
-    if (dirPath) {
-      setRenameDirOldName(basename(dirPath));
-      setRenameDirCallback(() => renameDirectory);
+    const latestDirPath = dirPathRef.current;
+    addDebugLog(`[useRenameDir] openModal called - dirPathRef: ${latestDirPath}`);
+    if (latestDirPath) {
+      const oldName = basename(latestDirPath);
+      addDebugLog(`[useRenameDir] Setting renameDirOldName to: ${oldName}`);
+      setRenameDirOldName(oldName);
+      setRenameDirCallback(renameDirectory);
       openRenameDirModal();
+    } else {
+      addDebugLog(`[useRenameDir] ABORT openModal - dirPathRef is undefined`);
     }
-  }, [dirPath, renameDirectory, setRenameDirCallback, setRenameDirOldName, openRenameDirModal]);
+  }, [renameDirectory, setRenameDirCallback, setRenameDirOldName, openRenameDirModal, addDebugLog]);
 
   return {
     openModal,

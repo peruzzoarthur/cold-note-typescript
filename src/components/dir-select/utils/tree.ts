@@ -1,4 +1,4 @@
-import { readdirSync, statSync, mkdirSync, rmdirSync, renameSync } from "fs";
+import { readdirSync, statSync, mkdirSync, rmSync, renameSync } from "fs";
 import { join, basename } from "path";
 import type { SelectOption } from "@opentui/core";
 import type { DirectoryNode, NavigationTree } from "../types";
@@ -126,16 +126,23 @@ export function addNodeToTree(
   parentPath: string, 
   dirName: string
 ): DirectoryNode | null {
+  console.log(`[addNodeToTree] Called - parentPath: ${parentPath}, dirName: ${dirName}`);
   const parent = tree.nodes.get(parentPath);
-  if (!parent) return null;
+  if (!parent) {
+    console.log(`[addNodeToTree] FAILED - parent not found in tree: ${parentPath}`);
+    return null;
+  }
   
   const newPath = join(parentPath, dirName);
+  console.log(`[addNodeToTree] newPath: ${newPath}`);
   
   // Create directory on filesystem
   try {
+    console.log(`[addNodeToTree] Creating directory on filesystem: ${newPath}`);
     mkdirSync(newPath);
+    console.log(`[addNodeToTree] Directory created successfully`);
   } catch (error) {
-    console.error("Failed to create directory:", error);
+    console.error("[addNodeToTree] Failed to create directory:", error);
     return null;
   }
   
@@ -159,17 +166,26 @@ export function addNodeToTree(
 }
 
 export function removeNodeFromTree(tree: NavigationTree, dirPath: string): boolean {
+  console.log(`[removeNodeFromTree] Called - dirPath: ${dirPath}`);
   const node = tree.nodes.get(dirPath);
-  if (!node) return false;
+  if (!node) {
+    console.log(`[removeNodeFromTree] FAILED - node not found: ${dirPath}`);
+    return false;
+  }
   
   // Cannot remove vault root
-  if (dirPath === tree.vaultPath) return false;
+  if (dirPath === tree.vaultPath) {
+    console.log(`[removeNodeFromTree] FAILED - cannot remove vault root: ${dirPath}`);
+    return false;
+  }
   
   // Remove from filesystem
   try {
-    rmdirSync(dirPath);
+    console.log(`[removeNodeFromTree] Removing from filesystem: ${dirPath}`);
+    rmSync(dirPath, { recursive: true, force: true });
+    console.log(`[removeNodeFromTree] Filesystem removal successful`);
   } catch (error) {
-    console.error("Failed to remove directory:", error);
+    console.error("[removeNodeFromTree] Failed to remove directory:", error);
     return false;
   }
   
@@ -226,55 +242,72 @@ export function renameNodeInTree(
   oldPath: string, 
   newName: string
 ): DirectoryNode | null {
+  console.log(`[renameNodeInTree] Called - oldPath: ${oldPath}, newName: ${newName}`);
   const node = tree.nodes.get(oldPath);
-  if (!node) return null;
+  if (!node) {
+    console.log(`[renameNodeInTree] FAILED - node not found: ${oldPath}`);
+    return null;
+  }
   
   // Cannot rename vault root
-  if (oldPath === tree.vaultPath) return null;
+  if (oldPath === tree.vaultPath) {
+    console.log(`[renameNodeInTree] FAILED - cannot rename vault root: ${oldPath}`);
+    return null;
+  }
   
   const parentPath = node.parentPath;
-  if (!parentPath) return null;
+  if (!parentPath) {
+    console.log(`[renameNodeInTree] FAILED - no parentPath for: ${oldPath}`);
+    return null;
+  }
   
   const newPath = join(parentPath, newName);
+  console.log(`[renameNodeInTree] newPath: ${newPath}`);
   
   // Rename on filesystem
   try {
+    console.log(`[renameNodeInTree] Renaming on filesystem: ${oldPath} -> ${newPath}`);
     renameSync(oldPath, newPath);
+    console.log(`[renameNodeInTree] Filesystem rename successful`);
   } catch (error) {
-    console.error("Failed to rename directory:", error);
+    console.error("[renameNodeInTree] Failed to rename directory:", error);
     return null;
   }
   
   // Update all descendant paths in the tree
-  const updateDescendantPaths = (oldP: string, newP: string) => {
+  const updateDescendantPaths = (oldP: string, newP: string, newParent: string | null) => {
     const n = tree.nodes.get(oldP);
     if (!n) return;
     
-    // Create new node with updated path
+    // Create new node with updated path and corrected parentPath
     const updatedNode: DirectoryNode = {
       ...n,
       dirPath: newP,
       dirName: basename(newP),
+      parentPath: newParent,
       childrenPaths: n.childrenPaths.map(childOldPath => {
         const relativePath = childOldPath.slice(oldP.length + 1);
         return join(newP, relativePath);
       }),
+      nextPath: n.nextPath && n.nextPath.startsWith(oldP + "/")
+        ? join(newP, n.nextPath.slice(oldP.length + 1))
+        : n.nextPath,
     };
     
     tree.nodes.delete(oldP);
     tree.nodes.set(newP, updatedNode);
     
-    // Recursively update children
+    // Recursively update children, passing newP as the new parent
     for (let i = 0; i < n.childrenPaths.length; i++) {
       const childOldPath = n.childrenPaths[i];
       const childNewPath = updatedNode.childrenPaths[i];
       if (childOldPath && childNewPath) {
-        updateDescendantPaths(childOldPath, childNewPath);
+        updateDescendantPaths(childOldPath, childNewPath, newP);
       }
     }
   };
   
-  updateDescendantPaths(oldPath, newPath);
+  updateDescendantPaths(oldPath, newPath, node.parentPath);
   
   // Update parent's childrenPaths
   const parent = tree.nodes.get(parentPath);

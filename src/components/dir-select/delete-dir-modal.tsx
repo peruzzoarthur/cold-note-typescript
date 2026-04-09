@@ -1,9 +1,10 @@
 import { TextAttributes, type KeyEvent } from "@opentui/core";
 import { theme } from "../../theme";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import { Modal } from "../modal";
 import { LAYOUT } from "../../constants";
+import { useAppMenus } from "../../contexts/AppStateContext";
 import "../ui/create-button";
 
 type DeleteDirModalProps = {
@@ -14,8 +15,15 @@ type DeleteDirModalProps = {
 
 export const DeleteDirModal = ({ dirName, onConfirm, onCancel }: DeleteDirModalProps) => {
   const [activeButton, setActiveButton] = useState(0); // 0 for No, 1 for Yes
+  const { addDebugLog } = useAppMenus();
+
+  // DEBUG: Log when modal mounts with dirName
+  useEffect(() => {
+    addDebugLog(`[DeleteDirModal] Mounted with dirName: "${dirName}"`);
+  }, [dirName, addDebugLog]);
 
   useKeyboard((key: KeyEvent) => {
+    addDebugLog(`[DeleteDirModal] Key pressed: ${key.name}, activeButton: ${activeButton}`);
     if (key.name === "tab") {
       // Toggle between buttons with tab
       setActiveButton(prev => prev === 0 ? 1 : 0);
@@ -24,16 +32,21 @@ export const DeleteDirModal = ({ dirName, onConfirm, onCancel }: DeleteDirModalP
     } else if (key.name === "right" || key.name === "l") {
       setActiveButton(1);
     } else if (key.name === "n") {
+      addDebugLog(`[DeleteDirModal] Cancel (n) pressed`);
       onCancel();
     } else if (key.name === "y") {
+      addDebugLog(`[DeleteDirModal] Confirm (y) pressed`);
       onConfirm();
     } else if (key.name === "return" || key.name === "enter") {
       if (activeButton === 1) {
+        addDebugLog(`[DeleteDirModal] Confirm (Enter) pressed`);
         onConfirm();
       } else {
+        addDebugLog(`[DeleteDirModal] Cancel (Enter) pressed`);
         onCancel();
       }
     } else if (key.name === "escape") {
+      addDebugLog(`[DeleteDirModal] Escape pressed`);
       onCancel();
     }
   });

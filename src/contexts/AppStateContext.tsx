@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from 'react';
 import type { KeyEvent } from '@opentui/core';
+import { appendFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 export type ModalType = 'createDir' | 'deleteDir' | 'renameDir' | 'noteExists' | null;
 
@@ -258,10 +260,28 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
   }, []);
   
   const addDebugLog = useCallback((message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = `${timestamp}: ${message}`;
+    
+    // Update UI state
     setUi(prev => ({
       ...prev,
-      debugLogs: [...prev.debugLogs.slice(-19), `${new Date().toLocaleTimeString()}: ${message}`]
+      debugLogs: [...prev.debugLogs.slice(-19), logEntry]
     }));
+    
+    // Also write to markdown file
+    try {
+      const logDir = join(process.cwd(), 'logs');
+      if (!existsSync(logDir)) {
+        mkdirSync(logDir, { recursive: true });
+      }
+      const logFile = join(logDir, 'debug.md');
+      const date = new Date().toISOString().split('T')[0];
+      const entry = `- **${timestamp}** - ${message}\n`;
+      appendFileSync(logFile, entry);
+    } catch (error) {
+      console.error('Failed to write to log file:', error);
+    }
   }, []);
   
   const setActiveTab = useCallback((tab: number) => {

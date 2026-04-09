@@ -96,14 +96,24 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
   
   // Select a child (updates selected index but doesn't navigate)
   selectChild: (index: number): void => {
+    console.log(`[store.selectChild] Called with index: ${index}`);
     const { tree, currentNode } = get();
-    if (!tree || !currentNode) return;
+    if (!tree || !currentNode) {
+      console.log(`[store.selectChild] ABORT - tree: ${tree}, currentNode: ${currentNode}`);
+      return;
+    }
+    
+    console.log(`[store.selectChild] currentNode.dirPath: ${currentNode.dirPath}, childrenPaths.length: ${currentNode.childrenPaths.length}, current selectedChildIndex: ${currentNode.selectedChildIndex}`);
     
     // Index is the direct index into children (no adjustment needed)
     if (selectChildNode(tree, index)) {
+      console.log(`[store.selectChild] selectChildNode succeeded, cloning tree`);
       // Clone tree to trigger update
       const newTree = cloneTree(tree);
       set({ tree: newTree });
+      console.log(`[store.selectChild] Tree updated`);
+    } else {
+      console.log(`[store.selectChild] selectChildNode returned false`);
     }
   },
   
@@ -128,10 +138,20 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
   
   // Add new directory
   addDirectory: (parentPath: string, dirName: string): void => {
+    console.log(`[store.addDirectory] Called with parentPath: ${parentPath}, dirName: ${dirName}`);
     const { tree, currentNode } = get();
-    if (!tree) return;
+    if (!tree) {
+      console.log(`[store.addDirectory] ABORT - tree is null`);
+      return;
+    }
     
-    addNodeToTree(tree, parentPath, dirName);
+    console.log(`[store.addDirectory] Calling addNodeToTree`);
+    const newNode = addNodeToTree(tree, parentPath, dirName);
+    if (!newNode) {
+      console.log(`[store.addDirectory] ABORT - addNodeToTree returned null`);
+      return; // filesystem or tree op failed — bail without phantom re-render
+    }
+    console.log(`[store.addDirectory] addNodeToTree succeeded, newNode.path: ${newNode.dirPath}`);
     
     // Clone tree and refresh state
     const newTree = cloneTree(tree);
@@ -147,10 +167,20 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
   
   // Remove directory
   removeDirectory: (dirPath: string): void => {
+    console.log(`[store.removeDirectory] Called with dirPath: ${dirPath}`);
     const { tree } = get();
-    if (!tree) return;
+    if (!tree) {
+      console.log(`[store.removeDirectory] ABORT - tree is null`);
+      return;
+    }
     
-    removeNodeFromTree(tree, dirPath);
+    console.log(`[store.removeDirectory] Calling removeNodeFromTree`);
+    const success = removeNodeFromTree(tree, dirPath);
+    if (!success) {
+      console.log(`[store.removeDirectory] ABORT - removeNodeFromTree returned false`);
+      return; // filesystem or tree op failed — bail without phantom re-render
+    }
+    console.log(`[store.removeDirectory] removeNodeFromTree succeeded`);
     
     // Clone tree and refresh state
     const newTree = cloneTree(tree);
@@ -162,12 +192,22 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
   
   // Rename directory
   renameDirectory: (oldPath: string, newName: string): void => {
+    console.log(`[store.renameDirectory] Called with oldPath: ${oldPath}, newName: ${newName}`);
     const { tree } = get();
-    if (!tree) return;
+    if (!tree) {
+      console.log(`[store.renameDirectory] ABORT - tree is null`);
+      return;
+    }
     
-    renameNodeInTree(tree, oldPath, newName);
+    console.log(`[store.renameDirectory] Calling renameNodeInTree`);
+    const renamedNode = renameNodeInTree(tree, oldPath, newName);
+    if (!renamedNode) {
+      console.log(`[store.renameDirectory] ABORT - renameNodeInTree returned null`);
+      return; // filesystem or tree op failed — bail without phantom re-render
+    }
+    console.log(`[store.renameDirectory] renameNodeInTree succeeded, renamedNode.path: ${renamedNode.dirPath}`);
     
-    // Clone tree and refresh state
+    // Clone tree and refresh state — currentPath may have been updated by renameNodeInTree
     const newTree = cloneTree(tree);
     const currentNode = newTree.nodes.get(newTree.currentPath) || null;
     const options = currentNode ? nodesToOptions(newTree, currentNode.dirPath) : [];

@@ -2,6 +2,7 @@ import { TextAttributes, type KeyEvent } from "@opentui/core";
 import { useCallback, useState } from "react";
 import { Modal } from "../modal";
 import { LAYOUT } from "../../constants";
+import { useAppMenus } from "../../contexts/AppStateContext";
 
 type CreateDirModalProps = {
   onSubmit: (dirName: string) => void;
@@ -10,17 +11,21 @@ type CreateDirModalProps = {
 
 export const CreateDirModal = ({ onSubmit, onCancel }: CreateDirModalProps) => {
   const [dirName, setDirName] = useState("");
+  const { addDebugLog } = useAppMenus();
 
   const handleKeyDown = useCallback(
     (key: KeyEvent) => {
+      addDebugLog(`[CreateDirModal] Key pressed: ${key.name}, dirName: "${dirName}"`);
       if (key.name === "return" && dirName.trim()) {
+        addDebugLog(`[CreateDirModal] Submitting dirName: "${dirName.trim()}"`);
         onSubmit(dirName.trim());
       }
       if (key.name === "escape") {
+        addDebugLog(`[CreateDirModal] Cancel pressed`);
         onCancel();
       }
     },
-    [dirName, onSubmit, onCancel],
+    [dirName, onSubmit, onCancel, addDebugLog],
   );
 
   return (

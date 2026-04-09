@@ -1,6 +1,5 @@
-import { rmSync } from "fs";
-import { useCallback } from "react";
-import { useModal } from "../../../contexts/AppStateContext";
+import { useCallback, useRef, useEffect } from "react";
+import { useModal, useAppMenus } from "../../../contexts/AppStateContext";
 import { basename } from "path";
 import { useDirNavigationStore } from "../store";
 
@@ -11,29 +10,47 @@ type UseDeleteDirProps = {
 export const useDeleteDir = ({ dirPath }: UseDeleteDirProps) => {
   const { openDeleteDirModal, setDeleteDirCallback, setDeleteDirName } = useModal();
   const store = useDirNavigationStore();
+  const { addDebugLog } = useAppMenus();
+  
+  // Use ref to always have latest dirPath without recreating callbacks
+  const dirPathRef = useRef(dirPath);
+  useEffect(() => {
+    dirPathRef.current = dirPath;
+    addDebugLog(`[useDeleteDir] dirPath updated: ${dirPath}`);
+  }, [dirPath, addDebugLog]);
 
   const deleteDirectory = useCallback(() => {
-    if (!dirPath) {
+    const latestDirPath = dirPathRef.current;
+    addDebugLog(`[useDeleteDir] deleteDirectory called - dirPathRef: ${latestDirPath}`);
+    if (!latestDirPath) {
+      addDebugLog(`[useDeleteDir] ABORT - dirPathRef is undefined`);
       return;
     }
 
     try {
-      rmSync(dirPath, { recursive: true, force: true });
-
-      // Remove from tree
-      store.removeDirectory(dirPath);
+      // store.removeDirectory handles the filesystem rmSync via removeNodeFromTree
+      addDebugLog(`[useDeleteDir] Calling store.removeDirectory(${latestDirPath})`);
+      store.removeDirectory(latestDirPath);
+      addDebugLog(`[useDeleteDir] store.removeDirectory completed`);
     } catch (error) {
+      addDebugLog(`[useDeleteDir] ERROR: ${error}`);
       console.error("Failed to delete directory:", error);
     }
-  }, [dirPath, store]);
+  }, [store, addDebugLog]);
 
   const openModal = useCallback(() => {
-    if (dirPath) {
-      setDeleteDirName(basename(dirPath));
-      setDeleteDirCallback(() => deleteDirectory);
+    const latestDirPath = dirPathRef.current;
+    addDebugLog(`[useDeleteDir] openModal called - dirPathRef: ${latestDirPath}`);
+    if (latestDirPath) {
+      const dirName = basename(latestDirPath);
+      addDebugLog(`[useDeleteDir] Setting deleteDirName to: ${dirName}`);
+      setDeleteDirName(dirName);
+      setDeleteDirCallback(deleteDirectory);
       openDeleteDirModal();
+    } else {
+      addDebugLog(`[useDeleteDir] ABORT openModal - dirPathRef is undefined`);
     }
-  }, [dirPath, deleteDirectory, setDeleteDirCallback, setDeleteDirName, openDeleteDirModal]);
+  }, [deleteDirectory, setDeleteDirCallback, setDeleteDirName, openDeleteDirModal, addDebugLog]);
 
   return {
     openModal,

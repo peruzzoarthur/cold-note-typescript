@@ -181,7 +181,14 @@ function App() {
       {isCreateDirModalOpen && createDirCallback && (
         <CreateDirModal
           onSubmit={(dirName) => {
-            createDirCallback(dirName);
+            addDebugLog(`[App] CreateDirModal onSubmit called with: "${dirName}"`);
+            addDebugLog(`[App] createDirCallback type: ${typeof createDirCallback}`);
+            try {
+              createDirCallback(dirName);
+              addDebugLog(`[App] createDirCallback executed successfully`);
+            } catch (error) {
+              addDebugLog(`[App] createDirCallback ERROR: ${error}`);
+            }
             closeCreateDirModal();
           }}
           onCancel={closeCreateDirModal}
@@ -191,7 +198,14 @@ function App() {
         <DeleteDirModal
           dirName={deleteDirName}
           onConfirm={() => {
-            deleteDirCallback();
+            addDebugLog(`[App] DeleteDirModal onConfirm called`);
+            addDebugLog(`[App] deleteDirCallback type: ${typeof deleteDirCallback}`);
+            try {
+              deleteDirCallback();
+              addDebugLog(`[App] deleteDirCallback executed successfully`);
+            } catch (error) {
+              addDebugLog(`[App] deleteDirCallback ERROR: ${error}`);
+            }
             closeDeleteDirModal();
           }}
           onCancel={closeDeleteDirModal}
@@ -201,7 +215,14 @@ function App() {
         <RenameDirModal
           oldName={renameDirOldName}
           onSubmit={(newName) => {
-            renameDirCallback(newName);
+            addDebugLog(`[App] RenameDirModal onSubmit called with: "${newName}"`);
+            addDebugLog(`[App] renameDirCallback type: ${typeof renameDirCallback}`);
+            try {
+              renameDirCallback(newName);
+              addDebugLog(`[App] renameDirCallback executed successfully`);
+            } catch (error) {
+              addDebugLog(`[App] renameDirCallback ERROR: ${error}`);
+            }
             closeRenameDirModal();
           }}
           onCancel={closeRenameDirModal}
