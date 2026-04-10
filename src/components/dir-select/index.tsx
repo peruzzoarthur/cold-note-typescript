@@ -55,6 +55,7 @@ export const DirSelect = ({
   // → onChange → selectChild → cloneTree → new tree ref → effect again.
   useEffect(() => {
     if (!selectRef.current || !store.tree || !store.currentNode) return;
+    if (store.currentNode.childrenPaths.length === 0) return; // placeholder shown, nothing to restore
     const idx = getSelectedIndex(store.tree, store.currentNode.dirPath);
     isRestoringCursor.current = true;
     selectRef.current.setSelectedIndex(idx);
@@ -97,11 +98,13 @@ export const DirSelect = ({
         return;
       }
 
-      // Navigate to child directory (l or right)
+      // Navigate to child directory (l or right) — always consume, only act if there are children
       if (key.name === "l" && !key.ctrl && !key.meta) {
-        const success = store.navigateToChild();
-        if (success && store.currentNode) {
-          setDirPath(store.currentNode.dirPath);
+        if (currentNode?.childrenPaths.length) {
+          const success = store.navigateToChild();
+          if (success && store.currentNode) {
+            setDirPath(store.currentNode.dirPath);
+          }
         }
         return;
       }
@@ -156,7 +159,8 @@ export const DirSelect = ({
     (_index: number, option: SelectOption | null) => {
       // Skip if we're restoring cursor from effect (to prevent overwriting nextPath)
       if (isRestoringCursor.current) return;
-      if (!option || !store.tree || option.name === "Press '-' to go back...") return;
+      // Skip null, special options, and the empty-dir placeholder
+      if (!option || !store.tree || !option.value || option.name === "Press '-' to go back...") return;
       const index = options.findIndex(opt => opt.value === option.value);
       if (index >= 0) {
         store.selectChild(index);
@@ -165,6 +169,12 @@ export const DirSelect = ({
     },
     [store, options, setDirPath]
   );
+
+  // Never pass an empty options array to Select — an empty list corrupts its internal
+  // cursor state and breaks all subsequent key events until navigation restores it.
+  const displayOptions = options.length > 0
+    ? options
+    : [{ name: "—  no subdirectories  —", value: "", description: "" }];
 
   return (
     <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
@@ -188,7 +198,7 @@ export const DirSelect = ({
           onKeyDown={handleNavigationKeyDown}
           selectedTextColor={theme.accent}
           showScrollIndicator
-          options={options}
+          options={displayOptions}
           style={{ flexGrow: 1 }}
         />
       </box>
