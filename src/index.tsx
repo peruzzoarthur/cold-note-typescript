@@ -105,6 +105,15 @@ function App() {
         return true;
       }
 
+      // Alt+1 to Alt+6 for direct tab selection
+      if (key.meta && !key.ctrl && !key.shift) {
+        const tabIndex = parseInt(key.name, 10) - 1;
+        if (tabIndex >= 0 && tabIndex < tabOptions.length) {
+          setSelectedTab(tabIndex);
+          return true;
+        }
+      }
+
       if (key.ctrl && key.name === "d") {
         toggleDebugMenu();
         return true;

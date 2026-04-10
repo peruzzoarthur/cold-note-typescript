@@ -1,0 +1,96 @@
+{
+  "success": true,
+  "clones": [
+    {
+      "fileA": "src/components/dir-select/hooks/useSetVaultPath.ts",
+      "startA": 88,
+      "fileB": "src/components/dir-select/hooks/useSetVaultPath.ts",
+      "startB": 38,
+      "lines": 12,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/layouts/WideScreenLayout.tsx",
+      "startA": 55,
+      "fileB": "src/components/layouts/WideScreenLayout.tsx",
+      "startB": 47,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/layouts/NarrowScreenLayout.tsx",
+      "startA": 41,
+      "fileB": "src/components/layouts/NarrowScreenLayout.tsx",
+      "startB": 34,
+      "lines": 43,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/layouts/NarrowScreenLayout.tsx",
+      "startA": 1,
+      "fileB": "src/components/layouts/WideScreenLayout.tsx",
+      "startB": 3,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/dir-select/store.ts",
+      "startA": 21,
+      "fileB": "src/components/dir-select/types.ts",
+      "startB": 21,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/dir-select/store.ts",
+      "startA": 198,
+      "fileB": "src/components/dir-select/store.ts",
+      "startB": 173,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/create-note/note-exists-modal.tsx",
+      "startA": 47,
+      "fileB": "src/components/dir-select/delete-dir-modal.tsx",
+      "startB": 57,
+      "lines": 21,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/create-note/note-exists-modal.tsx",
+      "startA": 19,
+      "fileB": "src/components/dir-select/delete-dir-modal.tsx",
+      "startB": 27,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/contexts/AppStateContext.tsx",
+      "startA": 239,
+      "fileB": "src/contexts/AppStateContext.tsx",
+      "startB": 211,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/contexts/AppStateContext.tsx",
+      "startA": 250,
+      "fileB": "src/contexts/AppStateContext.tsx",
+      "startB": 222,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "src/components/template-select.tsx",
+      "startA": 108,
+      "fileB": "src/components/dir-select/index.tsx",
+      "startB": 180,
+      "lines": 12,
+      "tokens": 0
+    }
+  ],
+  "duplicatedLines": 137,
+  "totalLines": 5075,
+  "percentage": 2.7
+}

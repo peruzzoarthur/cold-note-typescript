@@ -4,7 +4,7 @@ export const Footer = () => {
   return (
     <box alignItems="center">
       <text attributes={TextAttributes.DIM}>
-        Vim Navigation: h/j/k/l, Tab (next), Shift+Tab (prev)
+        Tab: ←/→ or Alt+1-6 | Config: Ctrl+P | Debug: Ctrl+D
       </text>
     </box>
   );

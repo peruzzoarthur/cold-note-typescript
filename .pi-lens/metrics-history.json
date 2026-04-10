@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "files": {
+    "src/components/dir-select/utils/tree.ts": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:54:58.216Z",
+        "mi": 27.5,
+        "cognitive": 140,
+        "nesting": 6,
+        "lines": 294,
+        "maxCyclomatic": 26,
+        "entropy": 5.99
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:54:58.216Z",
+          "mi": 27.5,
+          "cognitive": 140,
+          "nesting": 6,
+          "lines": 294,
+          "maxCyclomatic": 26,
+          "entropy": 5.99
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/dir-select/hooks/useCreateDir.ts": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:55:09.108Z",
+        "mi": 50.5,
+        "cognitive": 8,
+        "nesting": 4,
+        "lines": 34,
+        "maxCyclomatic": 3,
+        "entropy": 4.73
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:55:09.108Z",
+          "mi": 50.5,
+          "cognitive": 8,
+          "nesting": 4,
+          "lines": 34,
+          "maxCyclomatic": 3,
+          "entropy": 4.73
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/dir-select/hooks/useDeleteDir.ts": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:55:17.679Z",
+        "mi": 51,
+        "cognitive": 10,
+        "nesting": 4,
+        "lines": 33,
+        "maxCyclomatic": 2,
+        "entropy": 4.65
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:55:17.679Z",
+          "mi": 51,
+          "cognitive": 10,
+          "nesting": 4,
+          "lines": 33,
+          "maxCyclomatic": 2,
+          "entropy": 4.65
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/dir-select/store.ts": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:55:35.833Z",
+        "mi": 39.1,
+        "cognitive": 61,
+        "nesting": 3,
+        "lines": 121,
+        "maxCyclomatic": 33,
+        "entropy": 5.39
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:55:35.833Z",
+          "mi": 39.1,
+          "cognitive": 61,
+          "nesting": 3,
+          "lines": 121,
+          "maxCyclomatic": 33,
+          "entropy": 5.39
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/dir-select/index.tsx": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:55:44.920Z",
+        "mi": 33.3,
+        "cognitive": 74,
+        "nesting": 4,
+        "lines": 156,
+        "maxCyclomatic": 87,
+        "entropy": 6.23
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:55:44.920Z",
+          "mi": 33.3,
+          "cognitive": 74,
+          "nesting": 4,
+          "lines": 156,
+          "maxCyclomatic": 87,
+          "entropy": 6.23
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/dir-select/hooks/useRenameDir.ts": {
+      "latest": {
+        "commit": "4b96ac5",
+        "timestamp": "2026-04-09T22:56:10.625Z",
+        "mi": 48.5,
+        "cognitive": 15,
+        "nesting": 4,
+        "lines": 41,
+        "maxCyclomatic": 6,
+        "entropy": 4.97
+      },
+      "history": [
+        {
+          "commit": "4b96ac5",
+          "timestamp": "2026-04-09T22:56:10.625Z",
+          "mi": 48.5,
+          "cognitive": 15,
+          "nesting": 4,
+          "lines": 41,
+          "maxCyclomatic": 6,
+          "entropy": 4.97
+        }
+      ],
+      "trend": "stable"
+    },
+    "src/components/tags-select.tsx": {
+      "latest": {
+        "commit": "097d58a",
+        "timestamp": "2026-04-10T00:56:45.110Z",
+        "mi": 22.2,
+        "cognitive": 124,
+        "nesting": 8,
+        "lines": 246,
+        "maxCyclomatic": 57,
+        "entropy": 6.47
+      },
+      "history": [
+        {
+          "commit": "097d58a",
+          "timestamp": "2026-04-10T00:56:45.110Z",
+          "mi": 22.2,
+          "cognitive": 124,
+          "nesting": 8,
+          "lines": 246,
+          "maxCyclomatic": 57,
+          "entropy": 6.47
+        }
+      ],
+      "trend": "stable"
+    }
+  },
+  "capturedAt": "2026-04-10T00:56:50.111Z"
+}
