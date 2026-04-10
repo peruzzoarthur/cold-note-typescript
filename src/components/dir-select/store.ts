@@ -98,7 +98,9 @@ export const useDirNavigationStore = create<DirNavigationState>((set, get) => ({
     if (selectChildNode(tree, index)) {
       console.log(`[store.selectChild] selectChildNode succeeded, cloning tree`);
       const newTree = cloneTree(tree);
-      set({ tree: newTree });
+      // Must update currentNode too — it holds selectedChildIndex used by highlightedChildPath
+      const updatedCurrentNode = newTree.nodes.get(currentNode.dirPath) || null;
+      set({ tree: newTree, currentNode: updatedCurrentNode });
       console.log(`[store.selectChild] Tree updated`);
     } else {
       console.log(`[store.selectChild] selectChildNode returned false`);

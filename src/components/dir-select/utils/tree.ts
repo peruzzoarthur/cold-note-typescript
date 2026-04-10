@@ -167,7 +167,8 @@ export function addNodeToTree(
 
 export function removeNodeFromTree(tree: NavigationTree, dirPath: string): boolean {
   console.log(`[removeNodeFromTree] Called - dirPath: ${dirPath}`);
-  const node = tree.nodes.get(dirPath);
+  // Children are lazy-loaded — ensure the node exists in the tree before operating on it
+  const node = tree.nodes.get(dirPath) ?? ensureNodeLoaded(tree, dirPath);
   if (!node) {
     console.log(`[removeNodeFromTree] FAILED - node not found: ${dirPath}`);
     return false;
@@ -238,12 +239,13 @@ export function removeNodeFromTree(tree: NavigationTree, dirPath: string): boole
 }
 
 export function renameNodeInTree(
-  tree: NavigationTree, 
-  oldPath: string, 
+  tree: NavigationTree,
+  oldPath: string,
   newName: string
 ): DirectoryNode | null {
   console.log(`[renameNodeInTree] Called - oldPath: ${oldPath}, newName: ${newName}`);
-  const node = tree.nodes.get(oldPath);
+  // Children are lazy-loaded — ensure the node exists in the tree before operating on it
+  const node = tree.nodes.get(oldPath) ?? ensureNodeLoaded(tree, oldPath);
   if (!node) {
     console.log(`[renameNodeInTree] FAILED - node not found: ${oldPath}`);
     return null;

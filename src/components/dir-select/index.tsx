@@ -80,12 +80,9 @@ export const DirSelect = ({
     currentPath: currentNode?.dirPath || vaultRoot || undefined,
   });
 
-  const { openModal: openDeleteDirModal } = useDeleteDir({
-    dirPath: highlightedChildPath,
-  });
+  const { openModal: openDeleteDirModal } = useDeleteDir();
 
   const { openModal: openRenameDirModal } = useRenameDir({
-    dirPath: highlightedChildPath,
     selectedDirPath: noteData.dirPath,
     setSelectedDirPath: setDirPath,
   });
@@ -126,14 +123,14 @@ export const DirSelect = ({
       }
 
       // Delete highlighted child directory (d or delete)
-      if ((key.name === "d" || key.name === "delete") && highlightedChildPath && openDeleteDirModal) {
-        openDeleteDirModal();
+      if ((key.name === "d" || key.name === "delete") && highlightedChildPath) {
+        openDeleteDirModal(highlightedChildPath);
         return;
       }
 
       // Rename highlighted child directory (r)
-      if (key.name === "r" && highlightedChildPath && openRenameDirModal) {
-        openRenameDirModal();
+      if (key.name === "r" && highlightedChildPath) {
+        openRenameDirModal(highlightedChildPath);
         return;
       }
 
