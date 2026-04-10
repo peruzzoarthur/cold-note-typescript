@@ -155,10 +155,9 @@ export const TagsSelect = ({
       return;
     }
 
-    if (key.name === "escape") {
+    if (key.name === "escape" || key.name === "return" || key.name === "enter") {
+      // Exit search mode but KEEP searchInput and filteredTags intact
       setIsSearchMode(false);
-      setSearchInput("");
-      setFilteredTags(availableTags);
     } else if (key.name === "tab") {
       handleTabNavigation(key);
     }
@@ -180,6 +179,10 @@ export const TagsSelect = ({
       setIsInputMode(true);
     } else if (key.name === "s") {
       setIsSearchMode(true);
+      // preserve previous searchInput so user can edit/extend
+    } else if (key.name === "c" && searchInput.length > 0) {
+      setSearchInput("");
+      // filteredTags auto-resets via the handleSearch useEffect
     } else if (key.name === "left") {
       setActiveButton(0);
     } else if (key.name === "right") {
@@ -192,27 +195,6 @@ export const TagsSelect = ({
       <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
         <box style={{ flexDirection: "column", alignItems: "center" }}>
           <text>Loading tags database...</text>
-        </box>
-      </box>
-    );
-  }
-
-  if (isSearchMode) {
-    return (
-      <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
-        <box style={{ flexDirection: "column", alignItems: "center" }}>
-          <box style={{ border: true, width: LAYOUT.DIMENSIONS.INPUT_WIDTH, height: LAYOUT.DIMENSIONS.INPUT_HEIGHT }}>
-            <input
-              placeholder="Search tags..."
-              value={searchInput}
-              focused={focused}
-              onKeyDown={handleSearchKeyDown}
-              onInput={setSearchInput}
-            />
-          </box>
-          <text>
-            Found {filteredTags.length} tag(s) | Escape to clear search
-          </text>
         </box>
       </box>
     );
@@ -252,6 +234,23 @@ export const TagsSelect = ({
   return (
     <box style={{ paddingLeft: LAYOUT.SPACING.SMALL, paddingRight: LAYOUT.SPACING.SMALL }}>
       <box style={{ flexDirection: "column", width: LAYOUT.DIMENSIONS.SELECT_WIDTH }}>
+        {isSearchMode && (
+          <box
+            style={{
+              border: true,
+              width: LAYOUT.DIMENSIONS.SELECT_WIDTH,
+              height: LAYOUT.DIMENSIONS.INPUT_HEIGHT,
+            }}
+          >
+            <input
+              placeholder="Filter tags..."
+              value={searchInput}
+              focused={focused && isSearchMode}
+              onKeyDown={handleSearchKeyDown}
+              onInput={setSearchInput}
+            />
+          </box>
+        )}
         <box
           style={{
             height: LAYOUT.DIMENSIONS.SELECT_HEIGHT,
@@ -261,7 +260,7 @@ export const TagsSelect = ({
         >
           <select
             ref={selectRef}
-            focused={focused && !isInputMode}
+            focused={focused && !isInputMode && !isSearchMode}
             onSelect={handleTagToggle}
             onKeyDown={handleTagsKeyDown}
             showDescription={false}
@@ -272,7 +271,14 @@ export const TagsSelect = ({
           />
         </box>
         <box style={{ flexDirection: "row", justifyContent: "center" }}></box>
-        <text>Space: toggle | n: new | s: search | Enter: next</text>
+        {!isSearchMode && searchInput.length > 0 && (
+          <text>Filter: {searchInput} ({filteredTags.length})</text>
+        )}
+        {isSearchMode ? (
+          <text>Type to filter | Enter/Esc: back to list</text>
+        ) : (
+          <text>Space: toggle | n: new | s: search{searchInput.length > 0 ? " | c: clear" : ""} | Enter: next</text>
+        )}
       </box>
     </box>
   );
